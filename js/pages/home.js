@@ -19,17 +19,17 @@ function launchFavorite(favorite) {
             sessionStorage.setItem('prefilledTitle', favorite.prefill.title);
         }
     }
-    window.location.href = 'submit-request.html';
+    window.location.href = 'lops-general-intake.html';
 }
 
 // Render favorites
 function renderFavorites() {
     let currentUser = getCurrentUser();
     if (!currentUser) {
-        // Default to first user if not set
+        // Default to Macho Man (employee) if not set
         const users = getUsers();
         if (users.length > 0) {
-            currentUser = users[0];
+            currentUser = users.find(u => u.name === 'Macho Man') || users[0];
             setCurrentUser(currentUser);
         }
     }
@@ -78,7 +78,7 @@ window.navigateToRequest = function(departmentName) {
     if (departmentName) {
         sessionStorage.setItem('prefilledDepartment', departmentName);
     }
-    window.location.href = 'submit-request.html';
+    window.location.href = 'lops-general-intake.html';
 };
 
 // Navigate to department (global for onclick handlers)
@@ -86,7 +86,7 @@ window.navigateToDepartment = function(departmentName) {
     if (departmentName) {
         sessionStorage.setItem('prefilledDepartment', departmentName);
     }
-    window.location.href = 'submit-request.html';
+    window.location.href = 'lops-general-intake.html';
 };
 
 // Render department cards
@@ -96,6 +96,10 @@ function renderDepartmentCards() {
         cardsGrid.innerHTML = DEPARTMENT_OPTIONS.map(dept => renderDepartmentCard(dept)).join('');
     }
 }
+
+// m3 FIX: Store observer references for cleanup
+let statsObserver = null;
+let revealObserver = null;
 
 // Initialize animations (counter, reveal)
 function initAnimations() {
@@ -115,7 +119,7 @@ function initAnimations() {
     }
 
     // Intersection Observer for counter animation
-    const statsObserver = new IntersectionObserver((entries) => {
+    statsObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const statNumbers = document.querySelectorAll('.stat-number');
@@ -138,7 +142,7 @@ function initAnimations() {
 
     // Add smooth scroll reveal for sections
     const revealElements = document.querySelectorAll('.section-header, .department-card, .favorite-card');
-    const revealObserver = new IntersectionObserver((entries) => {
+    revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.style.opacity = '1';
@@ -150,6 +154,18 @@ function initAnimations() {
     revealElements.forEach(el => {
         revealObserver.observe(el);
     });
+}
+
+// m3 FIX: Cleanup observers on page hide/unload
+function cleanupObservers() {
+    if (statsObserver) {
+        statsObserver.disconnect();
+        statsObserver = null;
+    }
+    if (revealObserver) {
+        revealObserver.disconnect();
+        revealObserver = null;
+    }
 }
 
 // Initialize page
@@ -168,5 +184,8 @@ onReady(() => {
     
     // Initialize animations
     initAnimations();
+    
+    // m3 FIX: Cleanup observers on page hide (for bfcache support)
+    window.addEventListener('pagehide', cleanupObservers);
 });
 

@@ -57,7 +57,7 @@ function launchFavorite(favorite) {
             sessionStorage.setItem('prefilledTitle', favorite.prefill.title);
         }
     }
-    window.location.href = 'submit-request.html';
+    window.location.href = 'lops-general-intake.html';
 }
 
 // Current user management
@@ -117,6 +117,9 @@ function onReady(fn) {
 
 // Initialize tooltips or other UI enhancements
 function initializeUI() {
+    // Initialize default user if not set (defaults to Macho Man)
+    initializeDefaultUser();
+    
     // Initialize header user dropdown
     initializeUserDropdown();
     
@@ -128,6 +131,20 @@ function initializeUI() {
     
     // Update navigation for admin
     updateNavigationForAdmin();
+}
+
+// Initialize default user if not set
+function initializeDefaultUser() {
+    let currentUser = getCurrentUser();
+    if (!currentUser) {
+        const users = getUsers();
+        if (users.length > 0) {
+            // Default to Macho Man (employee) if available
+            currentUser = users.find(u => u.name === 'Macho Man') || users[0];
+            setCurrentUser(currentUser);
+        }
+    }
+    return currentUser;
 }
 
 // Update navigation for Admin role
@@ -220,6 +237,8 @@ function initializeRoleSwitcher() {
         const selectedUser = users.find(u => u.id === userId);
         if (selectedUser) {
             setCurrentUser(selectedUser);
+            // Scroll to top before reload
+            window.scrollTo(0, 0);
             // If on admin dashboard and switching to non-admin, redirect to home
             if (window.location.pathname.includes('admin-dashboard.html') && selectedUser.role !== 'admin') {
                 window.location.href = 'index.html';
@@ -245,16 +264,46 @@ function initializeUserDropdown() {
     // Create dropdown menu
     const dropdown = document.createElement('div');
     dropdown.className = 'user-dropdown-menu';
-    dropdown.innerHTML = `
-        <div class="user-info">
-            <span class="user-name-text">${currentUser.name}</span>
-            <span class="user-role-text">${currentUser.role}</span>
-        </div>
-        <a href="my-requests.html">My Requests</a>
-        ${currentUser.role === 'admin' ? '<a href="admin-dashboard.html">Admin Dashboard</a>' : ''}
-        <a href="submit-request.html">Submit Request</a>
-        <a href="index.html" onclick="clearCurrentUser()">Logout</a>
-    `;
+    
+    // Build dropdown content safely to prevent XSS
+    const userInfo = document.createElement('div');
+    userInfo.className = 'user-info';
+    
+    const userName = document.createElement('span');
+    userName.className = 'user-name-text';
+    userName.textContent = currentUser.name;
+    
+    const userRole = document.createElement('span');
+    userRole.className = 'user-role-text';
+    userRole.textContent = currentUser.role;
+    
+    userInfo.appendChild(userName);
+    userInfo.appendChild(userRole);
+    dropdown.appendChild(userInfo);
+    
+    // Add navigation links
+    const myRequestsLink = document.createElement('a');
+    myRequestsLink.href = 'my-requests.html';
+    myRequestsLink.textContent = 'My Requests';
+    dropdown.appendChild(myRequestsLink);
+    
+    if (currentUser.role === 'admin') {
+        const adminLink = document.createElement('a');
+        adminLink.href = 'admin-dashboard.html';
+        adminLink.textContent = 'Admin Dashboard';
+        dropdown.appendChild(adminLink);
+    }
+    
+    const submitLink = document.createElement('a');
+    submitLink.href = 'lops-general-intake.html';
+    submitLink.textContent = 'Submit Request';
+    dropdown.appendChild(submitLink);
+    
+    const logoutLink = document.createElement('a');
+    logoutLink.href = 'index.html';
+    logoutLink.textContent = 'Logout';
+    logoutLink.addEventListener('click', clearCurrentUser);
+    dropdown.appendChild(logoutLink);
     
     // Wrap user icon in dropdown container
     const wrapper = document.createElement('div');

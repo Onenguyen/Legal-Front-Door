@@ -123,15 +123,6 @@ export const ROLES = {
     EMPLOYEE: 'employee'
 };
 
-// Status Badge CSS Classes (now plain text)
-export const STATUS_BADGE_CLASSES = {
-    [STATUSES.SUBMITTED]: '',
-    [STATUSES.UNDER_REVIEW]: '',
-    [STATUSES.IN_PROGRESS]: '',
-    [STATUSES.RESOLVED]: '',
-    [STATUSES.CLOSED]: ''
-};
-
 // Priority CSS Classes
 export const PRIORITY_CLASSES = {
     [PRIORITIES.LOW]: 'priority-low',
@@ -176,7 +167,7 @@ export const DEPARTMENT_ICON_MAP = {
 export const ROUTES = {
     HOME: 'index.html',
     MY_REQUESTS: 'my-requests.html',
-    SUBMIT_REQUEST: 'submit-request.html',
+    SUBMIT_REQUEST: 'lops-general-intake.html',
     REQUEST_DETAIL: 'request-detail.html',
     ADMIN_DASHBOARD: 'admin-dashboard.html'
 };

@@ -1,14 +1,89 @@
 // Reusable Request Card Component
-import { STATUS_BADGE_CLASSES, PRIORITY_CLASSES, ROUTES } from '../core/constants.js';
+import { PRIORITY_CLASSES, ROUTES } from '../core/constants.js';
 import { getUserName } from '../core/state.js';
 import { getIconForRequestType } from './icons.js';
-import { escapeHtml, truncateText } from '../utils/dom.js';
+import { escapeHtml, truncateText, toTitleCase, getStatusClass } from '../utils/dom.js';
 import { formatDate } from '../utils/date.js';
+
+/**
+ * Parse request description JSON and extract meaningful details
+ * @param {Object} request - The request object
+ * @returns {Object} Parsed details for display
+ */
+function parseRequestDetails(request) {
+    let details = {
+        items: [],
+        helpType: null
+    };
+    
+    try {
+        // Try to parse the description as JSON (for LOPS General Intake requests)
+        const data = JSON.parse(request.description);
+        
+        details.helpType = data.helpType;
+        
+        // Add completion date if present
+        if (data.completionDate) {
+            const date = new Date(data.completionDate);
+            details.items.push({
+                label: 'Due',
+                value: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            });
+        }
+        
+        // Add request type (form)
+        if (request.type) {
+            details.items.push({ label: 'Form', value: request.type });
+        }
+        
+        // Handle different help types
+        if (data.helpType === 'signature' && data.signatureDetails) {
+            if (data.signatureDetails.files && data.signatureDetails.files.length > 0) {
+                details.items.push({ label: 'Files', value: `${data.signatureDetails.files.length} attached` });
+            }
+        } else if (data.helpType === 'contractPull' && data.contractPullDetails) {
+            if (data.contractPullDetails.agreementName) {
+                details.items.push({ label: 'Agreement', value: truncateText(data.contractPullDetails.agreementName, 30) });
+            }
+            if (data.contractPullDetails.originatingEntity) {
+                details.items.push({ label: 'Entity', value: toTitleCase(data.contractPullDetails.originatingEntity) });
+            }
+        } else if (data.helpType === 'other' && data.otherDetails) {
+            if (data.otherDetails.description) {
+                details.items.push({ label: 'Details', value: truncateText(data.otherDetails.description, 50) });
+            }
+        }
+        
+    } catch (e) {
+        // Not JSON, use description as-is
+        if (request.description) {
+            details.items.push({ label: 'Details', value: truncateText(request.description, 80) });
+        }
+    }
+    
+    return details;
+}
+
 
 // Render a single request card for grid view
 export function renderRequestCard(request) {
     const icon = getIconForRequestType(request.type);
     const assignedUserName = request.assignedTo ? getUserName(request.assignedTo) : '';
+    const submitterName = getUserName(request.submittedBy);
+    const details = parseRequestDetails(request);
+    const statusClass = getStatusClass(request.status);
+    
+    // Build details list HTML
+    const detailsHtml = details.items.length > 0 
+        ? `<div class="request-details-list">
+            ${details.items.map(item => `
+                <div class="request-detail-item">
+                    <span class="detail-label">${escapeHtml(item.label)}</span>
+                    <span class="detail-value">${escapeHtml(item.value)}</span>
+                </div>
+            `).join('')}
+           </div>`
+        : '';
     
     return `
         <div class="request-card" onclick="window.location.href='${ROUTES.REQUEST_DETAIL}?id=${escapeHtml(request.id)}'">
@@ -18,19 +93,19 @@ export function renderRequestCard(request) {
             
             <div class="request-header-main">
                 <h3 class="request-title">${escapeHtml(request.title)}</h3>
-                <span class="status-text">${escapeHtml(request.status)}</span>
+                <span class="status-badge ${statusClass}">${escapeHtml(request.status)}</span>
             </div>
             
             <div class="request-meta-info">
-                <span>REQ-${escapeHtml(request.id)}</span>
-                <span>•</span>
-                <span>${escapeHtml(request.type)}</span>
-                <span>•</span>
+                <span class="meta-id">REQ-${escapeHtml(request.id)}</span>
+                <span class="meta-separator">•</span>
+                <span>${escapeHtml(submitterName)}</span>
+                <span class="meta-separator">•</span>
                 <span>${formatDate(request.submittedDate)}</span>
-                ${request.priority !== 'Medium' ? `<span>•</span><span class="${PRIORITY_CLASSES[request.priority]}">${escapeHtml(request.priority)}</span>` : ''}
+                ${request.priority !== 'Medium' ? `<span class="meta-separator">•</span><span class="${PRIORITY_CLASSES[request.priority]}">${escapeHtml(request.priority)}</span>` : ''}
             </div>
             
-            <p class="request-desc">${escapeHtml(truncateText(request.description, 100))}</p>
+            ${detailsHtml}
             
             <div class="request-footer">
                 <div class="assigned-user">
@@ -94,22 +169,31 @@ export function displayRequests(containerId, requests) {
 }
 
 // Render a table row for admin dashboard
+// C3 FIX: Properly escape all user-controlled content to prevent XSS
 export function renderRequestTableRow(request) {
-    const assignedUserName = request.assignedTo ? getUserName(request.assignedTo) : '<span class="unassigned">Unassigned</span>';
     const submitterName = getUserName(request.submittedBy);
+    
+    // C3 FIX: Build assigned cell safely - escape user name if present, 
+    // use static HTML only for "Unassigned" state
+    const assignedCellContent = request.assignedTo 
+        ? escapeHtml(getUserName(request.assignedTo))
+        : '<span class="unassigned">Unassigned</span>';
+    
+    // C3 FIX: Validate priority class exists to prevent class injection
+    const priorityClass = PRIORITY_CLASSES[request.priority] || 'priority-medium';
     
     return `
         <tr onclick="window.location.href='${ROUTES.REQUEST_DETAIL}?id=${escapeHtml(request.id)}'" style="cursor: pointer;">
             <td><strong>REQ-${escapeHtml(request.id)}</strong></td>
             <td>${escapeHtml(request.title)}</td>
             <td>${escapeHtml(request.type)}</td>
-            <td><span class="${PRIORITY_CLASSES[request.priority]}">${escapeHtml(request.priority)}</span></td>
+            <td><span class="${priorityClass}">${escapeHtml(request.priority)}</span></td>
             <td><span class="status-text">${escapeHtml(request.status)}</span></td>
             <td>${escapeHtml(submitterName)}</td>
-            <td>${assignedUserName}</td>
+            <td>${assignedCellContent}</td>
             <td>${formatDate(request.submittedDate)}</td>
             <td onclick="event.stopPropagation()">
-                <button class="btn-small btn-primary" onclick="viewRequest('${escapeHtml(request.id)}')">View</button>
+                <button class="btn-small btn-primary" onclick="openAssignModal('${escapeHtml(request.id)}')">Assign</button>
             </td>
         </tr>
     `;
@@ -136,7 +220,7 @@ export function displayRequestsTable(requests) {
     tbody.innerHTML = requests.map(request => renderRequestTableRow(request)).join('');
 }
 
-// Render department card for home page
+// Render department card for home page with accessibility support
 export function renderDepartmentCard(department) {
     const { value, label, description } = department;
     let iconName = 'arrow';
@@ -169,14 +253,21 @@ export function renderDepartmentCard(department) {
             break;
     }
     
+    // Added tabindex, role, and keyboard support for accessibility
     return `
-        <div class="department-card" data-category="${escapeHtml(value.toLowerCase())}" onclick="navigateToDepartment('${escapeHtml(value)}')">
-            <div class="card-icon">
+        <div class="department-card" 
+             data-category="${escapeHtml(value.toLowerCase())}" 
+             onclick="navigateToDepartment('${escapeHtml(value)}')"
+             onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigateToDepartment('${escapeHtml(value)}'); }"
+             tabindex="0"
+             role="button"
+             aria-label="Navigate to ${escapeHtml(label)} legal services">
+            <div class="card-icon" aria-hidden="true">
                 ${getIconHtml(iconName)}
             </div>
             <h3>${escapeHtml(label)}</h3>
             <p>${escapeHtml(description)}</p>
-            <div class="card-launch-btn">
+            <div class="card-launch-btn" aria-hidden="true">
                 Launch
             </div>
         </div>

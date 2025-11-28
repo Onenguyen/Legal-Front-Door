@@ -7,6 +7,9 @@ export function renderNavbar(activePage = '') {
     const currentUser = getCurrentUser();
     const isAdmin = currentUser && currentUser.role === ROLES.ADMIN;
     
+    // Hide the Submit Request button when already on the form page to avoid confusion
+    const showSubmitButton = activePage !== 'submit';
+    
     const navHTML = `
         <nav class="navbar">
             <div class="nav-container">
@@ -19,7 +22,7 @@ export function renderNavbar(activePage = '') {
                     <a href="${ROUTES.MY_REQUESTS}" class="${activePage === 'my-requests' ? 'active' : ''}">My Requests</a>
                 </div>
                 <div class="nav-actions">
-                    <a href="${ROUTES.SUBMIT_REQUEST}" class="btn-submit-request ${activePage === 'submit' ? 'active' : ''}">Submit Request</a>
+                    ${showSubmitButton ? `<a href="${ROUTES.SUBMIT_REQUEST}" class="btn-submit-request">Submit Request</a>` : ''}
                 </div>
             </div>
         </nav>

@@ -1,6 +1,13 @@
 // Centralized State Management with Caching
 import { STORAGE_KEYS } from './constants.js';
 
+// M5 FIX: Storage limits to prevent unbounded growth
+const STORAGE_LIMITS = {
+    MAX_REQUESTS: 1000,
+    MAX_COMMENTS_PER_REQUEST: 100,
+    MAX_TOTAL_COMMENTS: 5000
+};
+
 // Cache for frequently accessed data
 const cache = {
     currentUser: null,
@@ -12,6 +19,26 @@ const cache = {
     userLookupMap: new Map()
 };
 
+// M6 FIX: Listen for storage changes from other tabs
+if (typeof window !== 'undefined') {
+    window.addEventListener('storage', (e) => {
+        if (e.key && e.key.startsWith('legalFrontDoor_')) {
+            // Invalidate relevant cache when another tab modifies data
+            if (e.key === STORAGE_KEYS.REQUESTS) {
+                cache.requests = null;
+                cache.userRequestsMap.clear();
+            } else if (e.key === STORAGE_KEYS.USERS) {
+                cache.users = null;
+                cache.userLookupMap.clear();
+            } else if (e.key === STORAGE_KEYS.COMMENTS) {
+                cache.comments = null;
+            } else if (e.key === STORAGE_KEYS.CURRENT_USER) {
+                cache.currentUser = null;
+            }
+        }
+    });
+}
+
 // Safe JSON parse with error handling
 function safeJsonParse(jsonString, fallback = null) {
     if (!jsonString) return fallback;
@@ -21,6 +48,65 @@ function safeJsonParse(jsonString, fallback = null) {
         console.error('Failed to parse JSON:', e);
         return fallback;
     }
+}
+
+// ============================================
+// Data Validation Functions (C5 Fix)
+// ============================================
+
+/**
+ * Validate user object structure
+ * @param {Object} user - User object to validate
+ * @returns {boolean} True if valid
+ */
+function isValidUser(user) {
+    if (!user || typeof user !== 'object') return false;
+    if (typeof user.id !== 'string' || user.id.trim() === '') return false;
+    if (typeof user.name !== 'string' || user.name.trim() === '') return false;
+    if (typeof user.email !== 'string') return false;
+    if (!['admin', 'employee'].includes(user.role)) return false;
+    return true;
+}
+
+/**
+ * Validate request object structure
+ * @param {Object} request - Request object to validate
+ * @returns {boolean} True if valid
+ */
+function isValidRequest(request) {
+    if (!request || typeof request !== 'object') return false;
+    if (typeof request.id !== 'string' || request.id.trim() === '') return false;
+    if (typeof request.title !== 'string') return false;
+    if (typeof request.status !== 'string') return false;
+    if (typeof request.submittedBy !== 'string') return false;
+    return true;
+}
+
+/**
+ * Validate comment object structure
+ * @param {Object} comment - Comment object to validate
+ * @returns {boolean} True if valid
+ */
+function isValidComment(comment) {
+    if (!comment || typeof comment !== 'object') return false;
+    if (typeof comment.id !== 'string' || comment.id.trim() === '') return false;
+    if (typeof comment.requestId !== 'string') return false;
+    if (typeof comment.userId !== 'string') return false;
+    if (typeof comment.text !== 'string') return false;
+    return true;
+}
+
+/**
+ * Validate favorite object structure
+ * @param {Object} favorite - Favorite object to validate
+ * @returns {boolean} True if valid
+ */
+function isValidFavorite(favorite) {
+    if (!favorite || typeof favorite !== 'object') return false;
+    if (typeof favorite.id !== 'string' || favorite.id.trim() === '') return false;
+    if (typeof favorite.userId !== 'string') return false;
+    if (typeof favorite.name !== 'string') return false;
+    return true;
 }
 
 // Current User Management
@@ -50,7 +136,8 @@ export function initializeDefaultUser() {
     if (!currentUser) {
         const users = getUsers();
         if (users.length > 0) {
-            currentUser = users[0];
+            // Default to Macho Man (employee) if available
+            currentUser = users.find(u => u.name === 'Macho Man') || users[0];
             setCurrentUser(currentUser);
         }
     }
@@ -64,7 +151,12 @@ export function getUsers() {
     }
     
     const users = localStorage.getItem(STORAGE_KEYS.USERS);
-    cache.users = safeJsonParse(users, []);
+    const parsed = safeJsonParse(users, []);
+    
+    // Validate and filter invalid entries (C5 fix)
+    cache.users = Array.isArray(parsed) 
+        ? parsed.filter(user => isValidUser(user))
+        : [];
     
     // Build lookup map for faster access
     cache.users.forEach(user => {
@@ -103,7 +195,13 @@ export function getAllRequests() {
     }
     
     const requests = localStorage.getItem(STORAGE_KEYS.REQUESTS);
-    cache.requests = safeJsonParse(requests, []);
+    const parsed = safeJsonParse(requests, []);
+    
+    // Validate and filter invalid entries (C5 fix)
+    cache.requests = Array.isArray(parsed)
+        ? parsed.filter(request => isValidRequest(request))
+        : [];
+    
     return cache.requests;
 }
 
@@ -134,6 +232,13 @@ export function saveRequest(request) {
     if (index !== -1) {
         requests[index] = request;
     } else {
+        // M5 FIX: Enforce storage limit - remove oldest if at capacity
+        if (requests.length >= STORAGE_LIMITS.MAX_REQUESTS) {
+            // Sort by date and remove oldest
+            requests.sort((a, b) => new Date(a.submittedDate) - new Date(b.submittedDate));
+            const removed = requests.shift();
+            console.warn(`Storage limit reached. Removed oldest request: ${removed.id}`);
+        }
         requests.push(request);
     }
     
@@ -217,6 +322,35 @@ export function updateRequestAssignment(requestId, assignedToUserId) {
     return saveRequest(request);
 }
 
+export function deleteRequest(requestId) {
+    const requests = getAllRequests();
+    const index = requests.findIndex(r => r.id === requestId);
+    
+    if (index === -1) {
+        return false;
+    }
+    
+    // Remove the request
+    requests.splice(index, 1);
+    
+    // Save updated requests
+    localStorage.setItem(STORAGE_KEYS.REQUESTS, JSON.stringify(requests));
+    
+    // Invalidate cache
+    cache.requests = null;
+    cache.userRequestsMap.clear();
+    
+    // Also delete associated comments
+    const comments = getAllComments();
+    const updatedComments = comments.filter(c => c.requestId !== requestId);
+    localStorage.setItem(STORAGE_KEYS.COMMENTS, JSON.stringify(updatedComments));
+    
+    // Invalidate comments cache
+    cache.comments = null;
+    
+    return true;
+}
+
 // Comment Management
 export function getAllComments() {
     if (cache.comments) {
@@ -224,7 +358,13 @@ export function getAllComments() {
     }
     
     const comments = localStorage.getItem(STORAGE_KEYS.COMMENTS);
-    cache.comments = safeJsonParse(comments, []);
+    const parsed = safeJsonParse(comments, []);
+    
+    // Validate and filter invalid entries (C5 fix)
+    cache.comments = Array.isArray(parsed)
+        ? parsed.filter(comment => isValidComment(comment))
+        : [];
+    
     return cache.comments;
 }
 
@@ -236,6 +376,26 @@ export function getRequestComments(requestId) {
 
 export function addComment(requestId, userId, text) {
     const comments = getAllComments();
+    
+    // M5 FIX: Check per-request comment limit
+    const requestComments = comments.filter(c => c.requestId === requestId);
+    if (requestComments.length >= STORAGE_LIMITS.MAX_COMMENTS_PER_REQUEST) {
+        console.warn(`Comment limit (${STORAGE_LIMITS.MAX_COMMENTS_PER_REQUEST}) reached for request ${requestId}`);
+        return null;
+    }
+    
+    // M5 FIX: Check total comments limit
+    if (comments.length >= STORAGE_LIMITS.MAX_TOTAL_COMMENTS) {
+        // Remove oldest comments (not from this request)
+        const otherComments = comments.filter(c => c.requestId !== requestId);
+        otherComments.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        const toRemove = otherComments.slice(0, 10); // Remove 10 oldest
+        toRemove.forEach(c => {
+            const idx = comments.findIndex(comment => comment.id === c.id);
+            if (idx !== -1) comments.splice(idx, 1);
+        });
+        console.warn('Total comment limit reached. Removed 10 oldest comments.');
+    }
     
     const newComment = {
         id: generateId(),
@@ -257,8 +417,14 @@ export function addComment(requestId, userId, text) {
 // Favorites Management
 export function getUserFavorites(userId) {
     const favorites = localStorage.getItem(STORAGE_KEYS.FAVORITES);
-    const allFavorites = safeJsonParse(favorites, []);
-    return allFavorites.filter(f => f.userId === userId);
+    const parsed = safeJsonParse(favorites, []);
+    
+    // Validate and filter invalid entries (C5 fix)
+    const validFavorites = Array.isArray(parsed)
+        ? parsed.filter(favorite => isValidFavorite(favorite))
+        : [];
+    
+    return validFavorites.filter(f => f.userId === userId);
 }
 
 // Utility Functions
@@ -266,11 +432,59 @@ export function generateId() {
     return Date.now().toString() + Math.random().toString(36).slice(2, 11);
 }
 
+/**
+ * Generate next request ID with race condition protection.
+ * Uses a simple lock mechanism to prevent duplicate IDs when
+ * multiple submissions happen in rapid succession.
+ * @returns {string} Unique request ID
+ */
 export function getNextRequestId() {
-    const nextId = localStorage.getItem(STORAGE_KEYS.NEXT_REQUEST_ID);
-    const id = nextId ? parseInt(nextId) : 1001;
-    localStorage.setItem(STORAGE_KEYS.NEXT_REQUEST_ID, (id + 1).toString());
-    return id.toString();
+    const lockKey = 'legalFrontDoor_idLock';
+    const maxRetries = 10;
+    const lockTimeout = 1000; // 1 second lock timeout
+    
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        const currentLock = localStorage.getItem(lockKey);
+        const now = Date.now();
+        
+        // Check if lock exists and is not stale
+        if (currentLock) {
+            const lockTime = parseInt(currentLock, 10);
+            if (!isNaN(lockTime) && (now - lockTime) < lockTimeout) {
+                // Lock is held, wait briefly and retry
+                continue;
+            }
+        }
+        
+        // Acquire lock
+        localStorage.setItem(lockKey, now.toString());
+        
+        try {
+            // Double-check we still hold the lock
+            if (localStorage.getItem(lockKey) !== now.toString()) {
+                continue; // Lost the race, retry
+            }
+            
+            const nextId = localStorage.getItem(STORAGE_KEYS.NEXT_REQUEST_ID);
+            const id = nextId ? parseInt(nextId, 10) : 1001;
+            
+            // Validate ID is a reasonable number
+            if (isNaN(id) || id < 1001) {
+                localStorage.setItem(STORAGE_KEYS.NEXT_REQUEST_ID, '1002');
+                return '1001';
+            }
+            
+            localStorage.setItem(STORAGE_KEYS.NEXT_REQUEST_ID, (id + 1).toString());
+            return id.toString();
+        } finally {
+            // Release lock
+            localStorage.removeItem(lockKey);
+        }
+    }
+    
+    // Fallback to timestamp-based ID if lock acquisition fails repeatedly
+    console.warn('Failed to acquire ID lock, using fallback ID generation');
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
 // Cache Invalidation

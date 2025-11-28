@@ -55,31 +55,55 @@ No installation required! This is a pure frontend application that runs in your 
 ### Demo Users
 
 **Employees:**
-- John Doe (Engineering)
-- Sarah Johnson (Sales)
-- Mike Chen (Marketing)
+- Macho Man (Business Development)
 
 **Legal Admins:**
-- Lisa Anderson (Legal)
-- David Martinez (Legal)
+- Vince McMahon (Legal)
 
 ## Project Structure
 
 ```
 legal-front-door/
-├── index.html              # Landing/login page
-├── submit-request.html     # Request submission form
-├── my-requests.html        # User dashboard
-├── admin-dashboard.html    # Admin view
-├── request-detail.html     # Individual request details
+├── index.html                    # Landing/home page
+├── lops-general-intake.html      # LOPS General Intake form
+├── my-requests.html              # User requests dashboard
+├── admin-dashboard.html          # Admin view for all requests
+├── request-detail.html           # Individual request details
 ├── css/
-│   └── styles.css          # Cohesity-branded stylesheet
+│   ├── main.css                  # Main stylesheet (imports others)
+│   ├── styles.css                # Legacy/form styles
+│   ├── base/                     # Base styles (reset, variables)
+│   ├── components/               # Component styles
+│   ├── layouts/                  # Layout styles
+│   └── pages/                    # Page-specific styles
 ├── js/
-│   ├── app.js              # Core application logic
-│   ├── requests.js         # Request management
-│   ├── search.js           # Search and filtering
-│   └── mock-data.js        # Sample data initialization
-└── README.md               # This file
+│   ├── app.js                    # Core application logic (global functions)
+│   ├── mock-data.js              # Sample data initialization
+│   ├── multi-select.js           # Multi-select dropdown component
+│   ├── requests.js               # Request management (deprecated - use state.js)
+│   ├── search.js                 # Search/filtering (deprecated - use filters.js)
+│   ├── core/
+│   │   ├── constants.js          # Shared constants and enums
+│   │   └── state.js              # Centralized state management with caching
+│   ├── components/
+│   │   ├── chatbot.js            # AI assistant chatbot
+│   │   ├── filters.js            # Filter controls component
+│   │   ├── icons.js              # SVG icon library
+│   │   ├── navbar.js             # Navigation bar component
+│   │   ├── people-picker.js      # People selection dropdown
+│   │   └── request-card.js       # Request card/table rendering
+│   ├── pages/
+│   │   ├── admin-dashboard.js    # Admin dashboard logic
+│   │   ├── home.js               # Home page logic
+│   │   ├── lops-general-intake.js # Intake form logic
+│   │   ├── my-requests.js        # My requests page logic
+│   │   └── request-detail.js     # Request detail page logic
+│   └── utils/
+│       ├── date.js               # Date formatting utilities
+│       └── dom.js                # DOM manipulation utilities
+├── assets/
+│   └── images/                   # Image assets
+└── README.md                     # This file
 ```
 
 ## Data Storage
@@ -119,11 +143,14 @@ Requires a modern browser with ES6+ JavaScript support and localStorage.
 
 ## Key Features Implementation
 
-### Submit Request
-- Form validation ensures all required fields are completed
-- File upload simulation captures file metadata
-- Automatic request ID generation
-- Success confirmation with navigation options
+### LOPS General Intake Form
+- Dynamic form with conditional sections based on request type
+- Support for Signature, Contract Pull, and Other request types
+- File upload with metadata capture
+- Auto-save draft functionality
+- Progress tracking with visual indicator
+- Form validation with inline error highlighting
+- Review modal before submission
 
 ### My Requests Dashboard
 - Card-based layout for easy scanning

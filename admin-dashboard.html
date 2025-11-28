@@ -13,11 +13,6 @@
     <div id="navbar"></div>
 
     <div class="container">
-        <div class="section-header">
-            <h2>Legal Request Dashboard</h2>
-            <p>View and manage all legal requests</p>
-        </div>
-
         <div class="stats-container">
             <div class="stat-card" id="totalRequestsCard" data-filter-type="all">
                 <div class="stat-value" id="totalRequests">0</div>
@@ -66,16 +61,6 @@
                     <option value="High">High</option>
                     <option value="Urgent">Urgent</option>
                 </select>
-                <div class="date-filters">
-                    <div class="date-input-group">
-                        <label>From Date</label>
-                        <input type="date" id="dateFrom" class="form-control">
-                    </div>
-                    <div class="date-input-group">
-                        <label>To Date</label>
-                        <input type="date" id="dateTo" class="form-control">
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -105,25 +90,44 @@
         </div>
     </div>
 
+    <div id="assignModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Assign Request</h2>
+                <span id="assignModalClose" class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="assignModalDescription" class="modal-description"></p>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="assignUserSelect">Assign To</label>
+                    <select id="assignUserSelect" class="form-control">
+                        <option value="">Unassigned</option>
+                    </select>
+                </div>
+                <div class="assign-modal-actions">
+                    <button id="cancelAssignBtn" class="btn btn-secondary btn-small">Cancel</button>
+                    <button id="confirmAssignBtn" class="btn btn-primary btn-small">Assign</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- M1, M2, M7 FIX: Cleaned up script loading - removed deprecated files, unified module approach -->
     <script src="js/mock-data.js"></script>
     <script src="js/app.js"></script>
-    <script src="js/requests.js"></script>
-    <script src="js/search.js"></script>
-    <script src="js/multi-select.js"></script>
+    <script type="module" src="js/multi-select.js"></script>
     <script type="module">
         import { autoInitNavbar } from './js/components/navbar.js';
         autoInitNavbar();
     </script>
     <script type="module" src="js/pages/admin-dashboard.js"></script>
-    <script>
-        // Backward compatibility
-        let currentUser = getCurrentUser();
-        if (!currentUser || currentUser.role !== 'admin') {
-            window.location.href = 'index.html';
-        }
-
-        // Backward compatibility - page logic now in js/pages/admin-dashboard.js
-    </script>
+    <!-- 
+        C2 FIX: Removed inline admin check script.
+        Admin access check is now handled exclusively in js/pages/admin-dashboard.js 
+        via checkAdminAccess() which runs after modules are properly loaded.
+        This prevents the race condition where getCurrentUser() might be called
+        before the state module is initialized.
+    -->
 </body>
 </html>
 

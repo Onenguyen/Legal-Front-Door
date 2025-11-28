@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOPS General Intake - Legal Front Door</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="navbar"></div>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>LOPS General Intake</h1>
+            <p>Use this form to request support from Legal Operations, including contract pulls, signature requests, and other general needs.</p>
+        </div>
+
+        <div class="form-layout">
+            <!-- Main Form Column -->
+            <div class="form-main">
+                <div class="card">
+                    <form id="requestForm" novalidate>
+                <!-- Request Details Section (Always Visible) -->
+                <fieldset class="form-section">
+                    <legend class="section-title">Request Details</legend>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="submittingForOther">Are you submitting this for someone else?</label>
+                            <div id="submittingForOther"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="completionDate">
+                                When do you need this completed?
+                                <span class="help-tooltip" data-tooltip="Standard turnaround is 3-5 business days">ⓘ</span>
+                            </label>
+                            <input type="date" id="completionDate" class="form-control">
+                            <small class="form-text">Standard turnaround: 3-5 business days</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>What kind of help do you need? <span class="required-indicator">*</span></label>
+                        <div class="radio-group radio-group-horizontal">
+                            <label class="radio-option">
+                                <input type="radio" name="helpType" value="signature" required>
+                                <span class="radio-label">Signature</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="helpType" value="contractPull" required>
+                                <span class="radio-label">Contract Pull</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="helpType" value="other" required>
+                                <span class="radio-label">Other</span>
+                            </label>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Signature Details Section (Conditional) -->
+                <fieldset id="signatureSection" class="form-section conditional-section" style="display: none;">
+                    <legend class="section-title">Signature Details</legend>
+                    
+                    <div class="form-group">
+                        <label for="fileToSign">Upload file to sign <span class="required-indicator">*</span></label>
+                        <input type="file" id="fileToSign" class="form-control" multiple>
+                        <small class="form-text">No Target File Repository Selected</small>
+                        <div id="signatureFileList" class="file-list"></div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>What kind of signature do you need? <span class="required-indicator">*</span></label>
+                            <div class="radio-group radio-group-horizontal">
+                                <label class="radio-option">
+                                    <input type="radio" name="signatureType" value="eSignature">
+                                    <span class="radio-label">E-Signature</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="signatureType" value="wetInk">
+                                    <span class="radio-label">Wet Ink</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Do any of these apply?</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-option">
+                                    <input type="checkbox" id="needsTranslation" name="needsTranslation">
+                                    <span class="checkbox-label">Needs Translation</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wet Ink Options (Conditional - shown when Wet Ink is selected) -->
+                    <div id="wetInkSection" class="conditional-section nested-conditional" style="display: none;">
+                        <div class="form-group">
+                            <label>Which Wet Ink options do you need? <span class="required-indicator">*</span></label>
+                            <div class="checkbox-group checkbox-group-horizontal">
+                                <label class="checkbox-option">
+                                    <input type="checkbox" id="wetInkNotarize" name="wetInkOptions" value="notarize">
+                                    <span class="checkbox-label">Notarize</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" id="wetInkStampSeal" name="wetInkOptions" value="stampSeal">
+                                    <span class="checkbox-label">Stamp/Seal</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" id="wetInkMailOriginals" name="wetInkOptions" value="mailOriginals">
+                                    <span class="checkbox-label">Mail original versions</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Notarization Fields (Conditional - shown when Notarize is checked) -->
+                        <div id="notarizationSection" class="conditional-section nested-conditional" style="display: none;">
+                                <div class="form-group">
+                                    <label>Which Notarial Act do you need?</label>
+                                    <div class="checkbox-group checkbox-group-horizontal">
+                                        <label class="checkbox-option">
+                                            <input type="checkbox" name="notarialAct" value="acknowledgements">
+                                            <span class="checkbox-label">Acknowledgements</span>
+                                        </label>
+                                        <label class="checkbox-option">
+                                            <input type="checkbox" name="notarialAct" value="jurats">
+                                            <span class="checkbox-label">Jurats</span>
+                                        </label>
+                                        <label class="checkbox-option">
+                                            <input type="checkbox" name="notarialAct" value="oathsAffirmations">
+                                            <span class="checkbox-label">Oaths and affirmations</span>
+                                        </label>
+                                        <label class="checkbox-option">
+                                            <input type="checkbox" name="notarialAct" value="witnessing">
+                                            <span class="checkbox-label">Witnessing or attesting a signature</span>
+                                        </label>
+                                        <label class="checkbox-option">
+                                            <input type="checkbox" name="notarialAct" value="certifiedCopy">
+                                            <span class="checkbox-label">Certified copy</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>
+                                        Do you need an Apostille?
+                                        <span class="help-tooltip" data-tooltip="An Apostille certifies a document for use in another country">ⓘ</span>
+                                    </label>
+                                    <div class="radio-group radio-group-horizontal">
+                                        <label class="radio-option">
+                                            <input type="radio" name="apostille" value="yes">
+                                            <span class="radio-label">Yes</span>
+                                        </label>
+                                        <label class="radio-option">
+                                            <input type="radio" name="apostille" value="no" checked="checked">
+                                            <span class="radio-label">No</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Apostille Country Field (Conditional - shown when Yes is selected) -->
+                                <div id="apostilleCountryField" class="form-group conditional-section" style="display: none;">
+                                    <label for="apostilleCountry">Which country is the Apostille for? <span class="required-indicator">*</span></label>
+                                    <input type="text" id="apostilleCountry" class="form-control" placeholder="Enter country name">
+                                </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Where will the notarization take place? <span class="required-indicator">*</span></label>
+                                    <div class="radio-group">
+                                        <label class="radio-option">
+                                            <input type="radio" name="notarizationLocation" value="unitedStates">
+                                            <span class="radio-label">United States</span>
+                                        </label>
+                                        <label class="radio-option">
+                                            <input type="radio" name="notarizationLocation" value="outsideUS">
+                                            <span class="radio-label">Outside of US</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- State Field (Conditional - shown when United States is selected) -->
+                                <div id="stateField" class="form-group conditional-section" style="display: none;">
+                                    <label for="notarizationState">Notarization State <span class="required-indicator">*</span></label>
+                                    <select id="notarizationState" class="form-control">
+                                        <option value="">-- Select State --</option>
+                                        <option value="AL">Alabama</option>
+                                        <option value="AK">Alaska</option>
+                                        <option value="AZ">Arizona</option>
+                                        <option value="AR">Arkansas</option>
+                                        <option value="CA">California</option>
+                                        <option value="CO">Colorado</option>
+                                        <option value="CT">Connecticut</option>
+                                        <option value="DE">Delaware</option>
+                                        <option value="FL">Florida</option>
+                                        <option value="GA">Georgia</option>
+                                        <option value="HI">Hawaii</option>
+                                        <option value="ID">Idaho</option>
+                                        <option value="IL">Illinois</option>
+                                        <option value="IN">Indiana</option>
+                                        <option value="IA">Iowa</option>
+                                        <option value="KS">Kansas</option>
+                                        <option value="KY">Kentucky</option>
+                                        <option value="LA">Louisiana</option>
+                                        <option value="ME">Maine</option>
+                                        <option value="MD">Maryland</option>
+                                        <option value="MA">Massachusetts</option>
+                                        <option value="MI">Michigan</option>
+                                        <option value="MN">Minnesota</option>
+                                        <option value="MS">Mississippi</option>
+                                        <option value="MO">Missouri</option>
+                                        <option value="MT">Montana</option>
+                                        <option value="NE">Nebraska</option>
+                                        <option value="NV">Nevada</option>
+                                        <option value="NH">New Hampshire</option>
+                                        <option value="NJ">New Jersey</option>
+                                        <option value="NM">New Mexico</option>
+                                        <option value="NY">New York</option>
+                                        <option value="NC">North Carolina</option>
+                                        <option value="ND">North Dakota</option>
+                                        <option value="OH">Ohio</option>
+                                        <option value="OK">Oklahoma</option>
+                                        <option value="OR">Oregon</option>
+                                        <option value="PA">Pennsylvania</option>
+                                        <option value="RI">Rhode Island</option>
+                                        <option value="SC">South Carolina</option>
+                                        <option value="SD">South Dakota</option>
+                                        <option value="TN">Tennessee</option>
+                                        <option value="TX">Texas</option>
+                                        <option value="UT">Utah</option>
+                                        <option value="VT">Vermont</option>
+                                        <option value="VA">Virginia</option>
+                                        <option value="WA">Washington</option>
+                                        <option value="WV">West Virginia</option>
+                                        <option value="WI">Wisconsin</option>
+                                        <option value="WY">Wyoming</option>
+                                        <option value="DC">District of Columbia</option>
+                                    </select>
+                                </div>
+
+                                <!-- Country Field (Conditional - shown when Outside of US is selected) -->
+                                <div id="countryField" class="form-group conditional-section" style="display: none;">
+                                    <label for="notarizationCountry">Notarization Country <span class="required-indicator">*</span></label>
+                                    <input type="text" id="notarizationCountry" class="form-control" placeholder="Enter country name">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="wetInkCopies">How many copies? <span class="required-indicator">*</span></label>
+                                    <input type="number" id="wetInkCopies" class="form-control" min="1" placeholder="Enter number">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Need a scanned copy? <span class="required-indicator">*</span></label>
+                                    <div class="radio-group radio-group-horizontal">
+                                        <label class="radio-option">
+                                            <input type="radio" name="scannedCopy" value="yes">
+                                            <span class="radio-label">Yes</span>
+                                        </label>
+                                        <label class="radio-option">
+                                            <input type="radio" name="scannedCopy" value="no">
+                                            <span class="radio-label">No</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>What should we do with the Wet Ink originals? <span class="required-indicator">*</span></label>
+                                <div class="radio-group radio-group-horizontal">
+                                    <label class="radio-option">
+                                        <input type="radio" name="wetInkOriginals" value="mailOriginals">
+                                        <span class="radio-label">Mail originals</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="wetInkOriginals" value="fileWithLegal">
+                                        <span class="radio-label">File with Legal</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="wetInkOriginals" value="destroy">
+                                        <span class="radio-label">Destroy</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="wetInkOriginals" value="other">
+                                        <span class="radio-label">Other</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Mailing Address Fields (Conditional - shown when Mail originals checkbox OR radio is selected) -->
+                    <div id="mailingAddressSection" class="conditional-section nested-conditional" style="display: none;">
+                        <label class="form-group-label" style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.95rem; color: var(--text-primary); display: block; margin-bottom: 1rem;">Mailing Information</label>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="mailingRecipient">Recipient Name <span class="required-indicator">*</span></label>
+                                <input type="text" id="mailingRecipient" class="form-control" placeholder="Full name">
+                            </div>
+                            <div class="form-group">
+                                <label for="mailingCompany">Company (optional)</label>
+                                <input type="text" id="mailingCompany" class="form-control" placeholder="Company name">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="mailingAddress">Street Address <span class="required-indicator">*</span></label>
+                            <input type="text" id="mailingAddress" class="form-control" placeholder="Street address">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="mailingCity">City <span class="required-indicator">*</span></label>
+                                <input type="text" id="mailingCity" class="form-control" placeholder="City">
+                            </div>
+                            <div class="form-group">
+                                <label for="mailingStateProvince">State/Province <span class="required-indicator">*</span></label>
+                                <input type="text" id="mailingStateProvince" class="form-control" placeholder="State or Province">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="mailingPostalCode">Postal Code <span class="required-indicator">*</span></label>
+                                <input type="text" id="mailingPostalCode" class="form-control" placeholder="Postal code">
+                            </div>
+                            <div class="form-group">
+                                <label for="mailingCountry">Country <span class="required-indicator">*</span></label>
+                                <input type="text" id="mailingCountry" class="form-control" placeholder="Country">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signatureNotes">Is there anything else we should know?</label>
+                        <textarea id="signatureNotes" class="form-control" rows="4" placeholder="Additional information..."></textarea>
+                    </div>
+                </fieldset>
+
+                <!-- Contract Pull Details Section (Conditional) -->
+                <fieldset id="contractPullSection" class="form-section conditional-section" style="display: none;">
+                    <legend class="section-title">Contract Pull Details</legend>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Is this a Sales Contract? <span class="required-indicator">*</span></label>
+                            <div class="radio-group radio-group-horizontal">
+                                <label class="radio-option">
+                                    <input type="radio" name="salesContract" value="no" checked>
+                                    <span class="radio-label">No</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="salesContract" value="yes">
+                                    <span class="radio-label">Yes</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Originating Entity <span class="required-indicator">*</span></label>
+                            <div class="radio-group radio-group-horizontal">
+                                <label class="radio-option">
+                                    <input type="radio" name="originatingEntity" value="cohesity">
+                                    <span class="radio-label">Cohesity</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="originatingEntity" value="veritas">
+                                    <span class="radio-label">Veritas</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="companyNames">Company Name(s)</label>
+                            <textarea id="companyNames" class="form-control" rows="3" placeholder="Enter company name(s)..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="agreementName">Agreement Name <span class="required-indicator">*</span></label>
+                            <input type="text" id="agreementName" class="form-control" placeholder="Enter agreement name">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contractPullDescription">Tell Us What You Need <span class="required-indicator">*</span></label>
+                        <textarea id="contractPullDescription" class="form-control" rows="4" placeholder="Describe what you need..."></textarea>
+                    </div>
+                </fieldset>
+
+                <!-- Other Details Section (Conditional) -->
+                <fieldset id="otherSection" class="form-section conditional-section" style="display: none;">
+                    <legend class="section-title">Other Request Details</legend>
+                    
+                    <div class="form-group">
+                        <label for="otherDescription">Tell Us What You Need <span class="required-indicator">*</span></label>
+                        <textarea id="otherDescription" class="form-control" rows="6" placeholder="Please describe your request in detail..."></textarea>
+                    </div>
+                </fieldset>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+                        <button type="button" id="reviewBtn" class="btn btn-primary" style="display: none;">Review Request</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">Submit Request</button>
+                    </div>
+                    </form>
+                </div><!-- /.card -->
+
+                <!-- Review Modal -->
+                <div id="reviewModal" class="review-modal" style="display: none;">
+                    <div class="review-modal-content">
+                        <div class="review-modal-header">
+                            <h3>Review Your Request</h3>
+                            <button type="button" class="review-modal-close" id="closeReview">&times;</button>
+                        </div>
+                        <div class="review-modal-body" id="reviewContent"></div>
+                        <div class="review-modal-footer">
+                            <button type="button" class="btn btn-secondary" id="editRequest">Edit</button>
+                            <button type="button" class="btn btn-primary" id="confirmSubmit">Confirm & Submit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="successMessage" class="alert alert-success" style="display: none;">
+                    <h3>Request Submitted Successfully!</h3>
+                    <p>Your request has been submitted and assigned ID: <strong id="newRequestId"></strong></p>
+                    <p>You will receive updates as your request is processed.</p>
+                    <button class="btn btn-primary" onclick="window.location.href='my-requests.html'">View My Requests</button>
+                    <button class="btn btn-secondary" onclick="window.location.href='lops-general-intake.html'">Submit Another Request</button>
+                </div>
+            </div><!-- /.form-main -->
+
+            <!-- Sticky Summary Panel -->
+            <aside class="summary-panel" id="summaryPanel">
+                <div class="summary-panel-inner">
+                    <h3>Request Summary</h3>
+                    <div class="summary-content">
+                        <div class="summary-item">
+                            <label>Request Type</label>
+                            <span id="summaryType">Not selected</span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Requested Date</label>
+                            <span id="summaryDate">Not set</span>
+                        </div>
+                        <div class="summary-item" id="summaryFilesSection" style="display: none;">
+                            <label>Files Uploaded</label>
+                            <span id="summaryFiles">0</span>
+                        </div>
+                        <div class="summary-progress">
+                            <h4>Progress</h4>
+                            <div class="summary-progress-bar">
+                                <div class="summary-progress-fill" id="summaryProgressFill"></div>
+                            </div>
+                            <p id="summaryProgressText">0% Complete</p>
+                        </div>
+                        <div class="summary-required">
+                            <h4>Required Fields</h4>
+                            <ul id="summaryRequiredList"></ul>
+                        </div>
+                    </div>
+                    <div class="summary-actions">
+                        <button type="button" class="btn btn-small btn-secondary" id="clearDraft">Clear Draft</button>
+                        <div id="autoSaveStatus" class="auto-save-status"></div>
+                    </div>
+                </div>
+            </aside>
+        </div><!-- /.form-layout -->
+    </div><!-- /.container -->
+
+    <!-- M1, M7 FIX: Cleaned up script loading - removed deprecated files -->
+    <script src="js/mock-data.js"></script>
+    <script src="js/app.js"></script>
+    <script type="module">
+        import { autoInitNavbar } from './js/components/navbar.js';
+        autoInitNavbar();
+    </script>
+    <script type="module" src="js/pages/lops-general-intake.js"></script>
+</body>
+</html>
+

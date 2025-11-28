@@ -1,6 +1,16 @@
 // Reusable Filter Controls Component
 import { STATUS_OPTIONS, REQUEST_TYPE_OPTIONS, PRIORITY_OPTIONS } from '../core/constants.js';
 import { escapeHtml } from '../utils/dom.js';
+import { MultiSelect } from '../multi-select.js';
+
+// M8 FIX: Debounce utility for search input
+function debounce(fn, delay) {
+    let timeoutId;
+    return function(...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn.apply(this, args), delay);
+    };
+}
 
 // Render filters section HTML
 export function renderFiltersSection(options = {}) {
@@ -9,7 +19,7 @@ export function renderFiltersSection(options = {}) {
         showStatus = true,
         showType = true,
         showPriority = true,
-        showDateRange = true,
+        showDateRange = false,
         searchPlaceholder = 'Search by title, ID, or description...'
     } = options;
     
@@ -80,7 +90,9 @@ export function initializeFilters(onChangeCallback) {
     const dateTo = document.getElementById('dateTo');
     
     if (searchInput) {
-        searchInput.addEventListener('input', onChangeCallback);
+        // M8 FIX: Debounce search input to avoid excessive filtering on every keystroke
+        const debouncedCallback = debounce(onChangeCallback, 300);
+        searchInput.addEventListener('input', debouncedCallback);
     }
     
     if (dateFrom) {
@@ -139,12 +151,11 @@ export function filterRequests(requests, filterValues) {
     if (searchTerm && searchTerm.trim() !== '') {
         const term = searchTerm.toLowerCase().trim();
         filtered = filtered.filter(request => {
-            // Import getUserName from state if needed (or pass as dependency)
             return (
-                request.title.toLowerCase().includes(term) ||
-                request.description.toLowerCase().includes(term) ||
-                request.id.includes(term) ||
-                (request.department && request.department.toLowerCase().includes(term))
+                (request.title || '').toLowerCase().includes(term) ||
+                (request.description || '').toLowerCase().includes(term) ||
+                (request.id || '').includes(term) ||
+                (request.department || '').toLowerCase().includes(term)
             );
         });
     }

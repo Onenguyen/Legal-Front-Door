@@ -151,12 +151,7 @@ export function getIcon(iconType, size = 48) {
     return icon;
 }
 
-// Get icon with specific CSS class
-export function getIconWithClass(iconType, cssClass, size = 48) {
-    const iconSVG = getIcon(iconType, size);
-    
-    return `<div class="card-icon ${cssClass}">${iconSVG}</div>`;
-}
+// m5 FIX: Removed unused getIconWithClass function
 
 // Export all icons for direct access if needed
 export { ICONS };

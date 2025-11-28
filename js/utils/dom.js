@@ -193,3 +193,36 @@ export function truncateText(text, maxLength) {
     return text.substring(0, maxLength) + '...';
 }
 
+// Convert string to title case (handles camelCase)
+export function toTitleCase(str) {
+    if (!str) return '';
+    // Handle camelCase by inserting spaces before capital letters
+    const withSpaces = str.replace(/([a-z])([A-Z])/g, '$1 $2');
+    // Capitalize first letter of each word
+    return withSpaces
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+}
+
+// Get status badge CSS class based on status string
+export function getStatusClass(status) {
+    const statusLower = (status || '').toLowerCase();
+    if (statusLower === 'submitted' || statusLower === 'pending') return 'status-pending';
+    if (statusLower === 'under review' || statusLower === 'in review') return 'status-under-review';
+    if (statusLower === 'in progress') return 'status-in-progress';
+    if (statusLower === 'resolved' || statusLower === 'completed' || statusLower === 'approved') return 'status-resolved';
+    if (statusLower === 'closed' || statusLower === 'rejected' || statusLower === 'cancelled') return 'status-closed';
+    return 'status-pending';
+}
+
+// Safe JSON parse with error handling
+export function safeJsonParse(jsonString, fallback = null) {
+    if (!jsonString) return fallback;
+    try {
+        return JSON.parse(jsonString);
+    } catch (e) {
+        console.error('Failed to parse JSON:', e);
+        return fallback;
+    }
+}

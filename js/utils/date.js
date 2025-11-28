@@ -25,11 +25,15 @@ export function formatDateTime(dateString) {
 }
 
 // Format date as "YYYY-MM-DD" for input fields
+// Uses local timezone to avoid off-by-one day errors from UTC conversion
 export function formatDateForInput(dateString) {
     if (!dateString) return '';
     
     const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 // Get relative time (e.g., "2 hours ago", "3 days ago")

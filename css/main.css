@@ -16,7 +16,7 @@
  * For now, we maintain the existing styles.css to avoid breaking changes.
  */
 
-@import url('../css/styles.css');
+@import url('styles.css');
 
 /* 
  * Additional imports can be added here as modules are extracted:

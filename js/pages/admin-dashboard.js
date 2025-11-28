@@ -1,18 +1,28 @@
 // Admin Dashboard Page Logic
-import { initializeDefaultUser, getAllRequests } from '../core/state.js';
-import { ROLES, ROUTES } from '../core/constants.js';
+import { initializeDefaultUser, getAllRequests, getUsers, updateRequestAssignment, addComment } from '../core/state.js';
+import { ROLES, ROUTES, STATUSES } from '../core/constants.js';
 import { displayRequestsTable } from '../components/request-card.js';
-import { initializeFilters, getFilterValues, filterRequests, clearFilters } from '../components/filters.js';
+import { initializeFilters, getFilterValues, filterRequests } from '../components/filters.js';
 import { onReady } from '../utils/dom.js';
 
 let allRequests = [];
 let multiSelects = null;
 let activeFilterCard = null;
 let isFilteringByCard = false;
+let currentUser = null;
+let selectedRequestId = null;
+const assignModalElements = {
+    modal: null,
+    description: null,
+    select: null,
+    confirmBtn: null,
+    cancelBtn: null,
+    closeBtn: null
+};
 
 // Check admin access
 function checkAdminAccess() {
-    const currentUser = initializeDefaultUser();
+    currentUser = initializeDefaultUser();
     if (!currentUser || currentUser.role !== ROLES.ADMIN) {
         window.location.href = ROUTES.HOME;
         return false;
@@ -27,7 +37,7 @@ function loadRequests() {
     displayRequestsTable(allRequests);
 }
 
-// Update statistics
+// Update statistics - m2 FIX: Use constants instead of magic strings
 function updateStats(requests) {
     const totalEl = document.getElementById('totalRequests');
     const pendingEl = document.getElementById('pendingRequests');
@@ -37,15 +47,15 @@ function updateStats(requests) {
     if (totalEl) totalEl.textContent = requests.length;
     if (pendingEl) {
         pendingEl.textContent = requests.filter(r => 
-            r.status === 'Submitted' || r.status === 'Under Review'
+            r.status === STATUSES.SUBMITTED || r.status === STATUSES.UNDER_REVIEW
         ).length;
     }
     if (inProgressEl) {
-        inProgressEl.textContent = requests.filter(r => r.status === 'In Progress').length;
+        inProgressEl.textContent = requests.filter(r => r.status === STATUSES.IN_PROGRESS).length;
     }
     if (completedEl) {
         completedEl.textContent = requests.filter(r => 
-            r.status === 'Resolved' || r.status === 'Closed'
+            r.status === STATUSES.RESOLVED || r.status === STATUSES.CLOSED
         ).length;
     }
 }
@@ -67,18 +77,19 @@ function applyFilters() {
         const filterType = activeFilterCard.getAttribute('data-filter-type');
         let shouldClear = false;
         
+        // m2 FIX: Use constants instead of magic strings
         if (filterType === 'all') {
             shouldClear = statusValues.length > 0 || typeValues.length > 0 || priorityValues.length > 0 || searchValue || dateFrom || dateTo;
         } else if (filterType === 'pending') {
-            const expectedStatuses = ['Submitted', 'Under Review'];
+            const expectedStatuses = [STATUSES.SUBMITTED, STATUSES.UNDER_REVIEW];
             const statusMatch = arraysEqual(statusValues.sort(), expectedStatuses.sort());
             shouldClear = !statusMatch || typeValues.length > 0 || priorityValues.length > 0 || searchValue || dateFrom || dateTo;
         } else if (filterType === 'in-progress') {
-            const expectedStatuses = ['In Progress'];
+            const expectedStatuses = [STATUSES.IN_PROGRESS];
             const statusMatch = arraysEqual(statusValues.sort(), expectedStatuses.sort());
             shouldClear = !statusMatch || typeValues.length > 0 || priorityValues.length > 0 || searchValue || dateFrom || dateTo;
         } else if (filterType === 'completed') {
-            const expectedStatuses = ['Resolved', 'Closed'];
+            const expectedStatuses = [STATUSES.RESOLVED, STATUSES.CLOSED];
             const statusMatch = arraysEqual(statusValues.sort(), expectedStatuses.sort());
             shouldClear = !statusMatch || typeValues.length > 0 || priorityValues.length > 0 || searchValue || dateFrom || dateTo;
         }
@@ -125,20 +136,20 @@ function filterByCard(cardElement) {
     if (multiSelects.typeMultiSelect) multiSelects.typeMultiSelect.clear();
     if (multiSelects.priorityMultiSelect) multiSelects.priorityMultiSelect.clear();
     
-    // Set status filter based on card type
+    // Set status filter based on card type - m2 FIX: Use constants
     if (multiSelects.statusMultiSelect) {
         switch(filterType) {
             case 'all':
                 multiSelects.statusMultiSelect.clear();
                 break;
             case 'pending':
-                multiSelects.statusMultiSelect.setValues(['Submitted', 'Under Review']);
+                multiSelects.statusMultiSelect.setValues([STATUSES.SUBMITTED, STATUSES.UNDER_REVIEW]);
                 break;
             case 'in-progress':
-                multiSelects.statusMultiSelect.setValues(['In Progress']);
+                multiSelects.statusMultiSelect.setValues([STATUSES.IN_PROGRESS]);
                 break;
             case 'completed':
-                multiSelects.statusMultiSelect.setValues(['Resolved', 'Closed']);
+                multiSelects.statusMultiSelect.setValues([STATUSES.RESOLVED, STATUSES.CLOSED]);
                 break;
         }
     }
@@ -213,10 +224,113 @@ function enableColumnResizing() {
     });
 }
 
-// Global function for view request
-window.viewRequest = function(id) {
-    window.location.href = `${ROUTES.REQUEST_DETAIL}?id=${id}`;
-};
+// Assignment modal helpers
+function initializeAssignModal() {
+    assignModalElements.modal = document.getElementById('assignModal');
+    assignModalElements.description = document.getElementById('assignModalDescription');
+    assignModalElements.select = document.getElementById('assignUserSelect');
+    assignModalElements.confirmBtn = document.getElementById('confirmAssignBtn');
+    assignModalElements.cancelBtn = document.getElementById('cancelAssignBtn');
+    assignModalElements.closeBtn = document.getElementById('assignModalClose');
+    
+    if (!assignModalElements.modal || !assignModalElements.select) {
+        return;
+    }
+    
+    if (assignModalElements.confirmBtn) {
+        assignModalElements.confirmBtn.addEventListener('click', handleAssignConfirm);
+    }
+    
+    if (assignModalElements.cancelBtn) {
+        assignModalElements.cancelBtn.addEventListener('click', closeAssignModal);
+    }
+    
+    if (assignModalElements.closeBtn) {
+        assignModalElements.closeBtn.addEventListener('click', closeAssignModal);
+    }
+    
+    assignModalElements.modal.addEventListener('click', (event) => {
+        if (event.target === assignModalElements.modal) {
+            closeAssignModal();
+        }
+    });
+}
+
+function populateAssignOptions(selectedUserId = '') {
+    const select = assignModalElements.select;
+    if (!select) return;
+    
+    const adminUsers = getUsers().filter(user => user.role === ROLES.ADMIN);
+    select.innerHTML = '<option value="">Unassigned</option>';
+    
+    adminUsers.forEach(admin => {
+        const option = document.createElement('option');
+        option.value = admin.id;
+        option.textContent = admin.name;
+        select.appendChild(option);
+    });
+    
+    if (selectedUserId) {
+        select.value = selectedUserId;
+    }
+}
+
+function openAssignModal(requestId) {
+    if (!assignModalElements.modal || !assignModalElements.select) return;
+    
+    const request = allRequests.find(r => r.id === requestId);
+    if (!request) return;
+    
+    selectedRequestId = requestId;
+    populateAssignOptions(request.assignedTo || '');
+    
+    if (assignModalElements.description) {
+        assignModalElements.description.textContent = `Assign "${request.title}" (REQ-${request.id}) to an admin.`;
+    }
+    
+    assignModalElements.modal.style.display = 'flex';
+}
+
+function closeAssignModal() {
+    if (assignModalElements.modal) {
+        assignModalElements.modal.style.display = 'none';
+    }
+    if (assignModalElements.select) {
+        assignModalElements.select.value = '';
+    }
+    selectedRequestId = null;
+}
+
+function handleAssignConfirm() {
+    if (!selectedRequestId || !assignModalElements.select) return;
+    
+    const assignedTo = assignModalElements.select.value;
+    const updatedRequest = updateRequestAssignment(selectedRequestId, assignedTo);
+    
+    if (!updatedRequest) {
+        closeAssignModal();
+        return;
+    }
+    
+    const requestIndex = allRequests.findIndex(r => r.id === selectedRequestId);
+    if (requestIndex !== -1) {
+        allRequests[requestIndex] = updatedRequest;
+    }
+    
+    if (currentUser) {
+        const assignee = assignedTo ? getUsers().find(user => user.id === assignedTo) : null;
+        const assigneeName = assignee ? assignee.name : 'Unassigned';
+        addComment(selectedRequestId, currentUser.id, `Request assigned to: ${assigneeName}`);
+    }
+    
+    closeAssignModal();
+    
+    if (multiSelects) {
+        applyFilters();
+    } else {
+        displayRequestsTable(allRequests);
+    }
+}
 
 // Initialize page
 onReady(() => {
@@ -226,5 +340,8 @@ onReady(() => {
     multiSelects = initializeFilters(applyFilters);
     initializeStatCardFilters();
     enableColumnResizing();
+    initializeAssignModal();
 });
+
+window.openAssignModal = openAssignModal;
 
