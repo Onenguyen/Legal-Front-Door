@@ -1,8 +1,8 @@
 // LOPS General Intake Form Logic - Enhanced UX
-import { initializeDefaultUser, createRequest } from '../core/state.js';
-import { onReady, toTitleCase } from '../utils/dom.js';
-import { ROUTES } from '../core/constants.js';
-import { createPeoplePicker } from '../components/people-picker.js';
+import { initializeDefaultUser, createRequest } from '../../core/state.js';
+import { onReady, toTitleCase } from '../../utils/dom.js';
+import { ROUTES } from '../../core/constants.js';
+import { createPeoplePicker } from '../../components/people-picker.js';
 
 // ============================================
 // Constants
@@ -26,6 +26,18 @@ const VALIDATION_LIMITS = {
     NOTES_MAX_LENGTH: 2000
 };
 
+const PREFILL_STORAGE_KEYS = {
+    DEPARTMENT: 'prefilledDepartment',
+    REQUEST_TYPE: 'prefilledRequestType',
+    TITLE: 'prefilledTitle'
+};
+
+let prefillContext = {
+    department: null,
+    requestType: null,
+    title: null
+};
+
 // ============================================
 // Helper Functions
 // ============================================
@@ -43,6 +55,37 @@ function showSection(section) {
         section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 100);
 }
+
+/**
+ * Increment a number counter input
+ * @param {string} inputId - The ID of the input element
+ */
+function incrementCounter(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const currentValue = parseInt(input.value) || 0;
+    input.value = currentValue + 1;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+/**
+ * Decrement a number counter input (minimum value is 1)
+ * @param {string} inputId - The ID of the input element
+ */
+function decrementCounter(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const currentValue = parseInt(input.value) || 1;
+    const minValue = parseInt(input.min) || 1;
+    if (currentValue > minValue) {
+        input.value = currentValue - 1;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+}
+
+// Make counter functions globally available for onclick handlers
+window.incrementCounter = incrementCounter;
+window.decrementCounter = decrementCounter;
 
 /**
  * Hide a conditional section and clear its inputs
@@ -151,6 +194,82 @@ function displayFileList(fileInput, listId) {
 }
 
 // ============================================
+// Prefill Helpers
+// ============================================
+
+function consumePrefillValue(key) {
+    try {
+        const value = sessionStorage.getItem(key);
+        if (value) {
+            sessionStorage.removeItem(key);
+            return value;
+        }
+    } catch (error) {
+        console.warn('Unable to read sessionStorage prefill key:', key, error);
+    }
+    return null;
+}
+
+function loadPrefillContext() {
+    prefillContext.department = consumePrefillValue(PREFILL_STORAGE_KEYS.DEPARTMENT);
+    prefillContext.requestType = consumePrefillValue(PREFILL_STORAGE_KEYS.REQUEST_TYPE);
+    prefillContext.title = consumePrefillValue(PREFILL_STORAGE_KEYS.TITLE);
+}
+
+function applyPrefillContext() {
+    if (prefillContext.requestType) {
+        const requestedType = document.querySelector(`input[name="helpType"][value="${prefillContext.requestType}"]`);
+        if (requestedType && !requestedType.checked) {
+            requestedType.checked = true;
+            handleHelpTypeChange();
+        }
+    }
+    updatePrefillBanner();
+}
+
+function updatePrefillBanner() {
+    if (!prefillBanner || !prefillBannerDetails) return;
+    
+    const details = [];
+    if (prefillContext.department) {
+        details.push(`Department: ${prefillContext.department}`);
+    }
+    if (prefillContext.requestType) {
+        details.push(`Request type: ${toTitleCase(prefillContext.requestType)}`);
+    }
+    if (prefillContext.title) {
+        details.push(`Suggested title: "${prefillContext.title}"`);
+    }
+    
+    if (details.length === 0) {
+        prefillBanner.style.display = 'none';
+        return;
+    }
+    
+    prefillBanner.style.display = 'flex';
+    prefillBannerDetails.textContent = details.join(' • ');
+}
+
+function clearPrefillContext() {
+    prefillContext = { department: null, requestType: null, title: null };
+    try {
+        Object.values(PREFILL_STORAGE_KEYS).forEach(key => sessionStorage.removeItem(key));
+    } catch (error) {
+        console.warn('Unable to clear prefill context:', error);
+    }
+    
+    const selectedHelpType = document.querySelector('input[name="helpType"]:checked');
+    if (selectedHelpType) {
+        selectedHelpType.checked = false;
+        handleHelpTypeChange();
+    }
+    
+    updatePrefillBanner();
+    updateProgress();
+    updateSummary();
+}
+
+// ============================================
 // Form Section References
 // ============================================
 
@@ -165,6 +284,202 @@ let apostilleCountryField;
 let mailingAddressSection;
 let autoSaveTimer;
 let submittingForOtherPicker;
+let prefillBanner;
+let prefillBannerDetails;
+let prefillBannerAction;
+
+// Summary panel elements
+let summaryPanelToggle;
+let summaryPanelClose;
+let formLayout;
+let summarySidebarDots;
+let summarySidebarCollapsed;
+
+const SUMMARY_COLLAPSED_KEY = 'lops_summary_collapsed';
+
+// ============================================
+// Summary Panel Toggle
+// ============================================
+
+/**
+ * Toggle the summary panel visibility
+ * @param {boolean} collapsed - Whether to collapse the panel
+ */
+function toggleSummaryPanel(collapsed) {
+    if (!formLayout) return;
+    
+    if (collapsed) {
+        formLayout.classList.add('summary-collapsed');
+        updateDotPositions();
+    } else {
+        formLayout.classList.remove('summary-collapsed');
+        if (!summarySidebarCollapsed) {
+            summarySidebarCollapsed = document.getElementById('summarySidebarCollapsed');
+        }
+        summarySidebarCollapsed?.style.removeProperty('height');
+    }
+    
+    // Save preference to localStorage
+    try {
+        localStorage.setItem(SUMMARY_COLLAPSED_KEY, collapsed ? 'true' : 'false');
+    } catch (e) {
+        console.error('Failed to save summary panel state:', e);
+    }
+}
+
+/**
+ * Load summary panel state from localStorage
+ */
+function loadSummaryPanelState() {
+    try {
+        const collapsed = localStorage.getItem(SUMMARY_COLLAPSED_KEY) === 'true';
+        if (collapsed && formLayout) {
+            formLayout.classList.add('summary-collapsed');
+        }
+    } catch (e) {
+        console.error('Failed to load summary panel state:', e);
+    }
+}
+
+/**
+ * Update the collapsed sidebar dots based on required fields
+ */
+function updateSidebarDots() {
+    if (!summarySidebarDots) return;
+    
+    const requiredFields = getRequiredFields();
+    
+    // Clear existing dots
+    summarySidebarDots.innerHTML = '';
+    
+    // Field labels and element mappings
+    const fieldConfig = {
+        'helpType': { label: 'Help Type', element: 'input[name="helpType"]' },
+        'fileToSign': { label: 'File to Sign', element: '#fileToSign' },
+        'signatureType': { label: 'Signature Type', element: 'input[name="signatureType"]' },
+        'wetInkOptions': { label: 'Wet Ink Options', element: 'input[name="wetInkOptions"]' },
+        'scannedCopy': { label: 'Scanned Copy', element: 'input[name="scannedCopy"]' },
+        'wetInkOriginals': { label: 'Wet Ink Originals', element: 'input[name="wetInkOriginals"]' },
+        'notarizationLocation': { label: 'Notarization Location', element: 'input[name="notarizationLocation"]' },
+        'wetInkCopies': { label: 'Number of Copies', element: '#wetInkCopies' },
+        'notarizationState': { label: 'State', element: '#notarizationState' },
+        'notarizationCountry': { label: 'Country', element: '#notarizationCountry' },
+        'apostilleCountry': { label: 'Apostille Country', element: '#apostilleCountry' },
+        'mailingRecipient': { label: 'Recipient Name', element: '#mailingRecipient' },
+        'mailingAddress': { label: 'Street Address', element: '#mailingAddress' },
+        'mailingCity': { label: 'City', element: '#mailingCity' },
+        'mailingStateProvince': { label: 'State/Province', element: '#mailingStateProvince' },
+        'mailingPostalCode': { label: 'Postal Code', element: '#mailingPostalCode' },
+        'mailingCountry': { label: 'Mailing Country', element: '#mailingCountry' },
+        'salesContract': { label: 'Sales Contract', element: 'input[name="salesContract"]' },
+        'originatingEntity': { label: 'Originating Entity', element: 'input[name="originatingEntity"]' },
+        'agreementName': { label: 'Agreement Name', element: '#agreementName' },
+        'contractPullDescription': { label: 'Description', element: '#contractPullDescription' },
+        'otherDescription': { label: 'Description', element: '#otherDescription' }
+    };
+    
+    // Create dots for each required field
+    requiredFields.forEach(fieldName => {
+        const config = fieldConfig[fieldName];
+        if (!config) return;
+        
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'summary-sidebar-dot';
+        dot.setAttribute('data-field', fieldName);
+        dot.setAttribute('data-label', config.label);
+        dot.setAttribute('data-selector', config.element); // Store selector for positioning
+        dot.setAttribute('aria-label', `Go to ${config.label}`);
+        
+        // Check if field is completed
+        if (checkFieldCompletion(fieldName)) {
+            dot.classList.add('completed');
+        }
+        
+        // Click to scroll to field
+        dot.addEventListener('click', () => {
+            const targetElement = document.querySelector(config.element);
+            if (targetElement) {
+                // Find the parent form-group for better visibility
+                const formGroup = targetElement.closest('.form-group') || targetElement.closest('.form-section') || targetElement;
+                formGroup.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Focus the element if it's focusable
+                if (targetElement.focus) {
+                    setTimeout(() => targetElement.focus(), 500);
+                }
+            }
+        });
+        
+        summarySidebarDots.appendChild(dot);
+    });
+
+    // Update positions after DOM update
+    setTimeout(updateDotPositions, 100);
+}
+
+/**
+ * Update the vertical positions of dots to align with their fields
+ */
+function updateDotPositions() {
+    const formMain = document.querySelector('.form-main');
+    
+    if (!formMain) return;
+    
+    const dots = document.querySelectorAll('.summary-sidebar-dot');
+    
+    if (!summarySidebarCollapsed) {
+        summarySidebarCollapsed = document.getElementById('summarySidebarCollapsed');
+    }
+    
+    // Keep the collapsed sidebar the same height as the form so dots never overflow
+    if (summarySidebarCollapsed && summarySidebarCollapsed.offsetParent !== null) {
+        const formHeight = Math.max(formMain.scrollHeight, formMain.offsetHeight);
+        summarySidebarCollapsed.style.height = `${formHeight}px`;
+    }
+    
+    if (dots.length === 0) {
+        return;
+    }
+    
+    const formRect = formMain.getBoundingClientRect();
+    // Offset for the expand button (approx 60px: 32px height + margins)
+    // Actually, since .summary-sidebar-dots is absolute top 0, we align with form top.
+    // But we want dots to align with the FIELDS.
+    // So relativeTop = fieldTop - formTop.
+    
+    dots.forEach(dot => {
+        const selector = dot.getAttribute('data-selector');
+        if (!selector) return;
+        
+        // Handle radio buttons / groups where multiple elements match
+        // For radio/checkbox inputs, we want the group container or the first input
+        let target = document.querySelector(selector);
+        
+        if (target) {
+            // Use closest form-group to align with the label/container
+            const group = target.closest('.form-group') || target.closest('.form-section') || target;
+            const rect = group.getBoundingClientRect();
+            
+            // Calculate top relative to formMain
+            // This works because the sidebar container is aligned with formMain in the grid
+            let relativeTop = rect.top - formRect.top;
+            
+            // Center the dot on the field label (approx 10px down)
+            // or center in the group height if desired.
+            // Aligning with top of group is usually best for "reading" the form.
+            relativeTop += 12; 
+            
+            // Ensure it doesn't overlap the expand button (approx 60px reserved at top)
+            // If the first field is at top, dot might be under button.
+            // The button is sticky, so it floats.
+            // We might want to push the sidebar content down or just let it be.
+            // If we want true alignment, we let it be.
+            
+            dot.style.top = `${Math.max(0, relativeTop)}px`;
+        }
+    });
+}
 
 // ============================================
 // Progress Tracking
@@ -324,6 +639,9 @@ function updateProgress() {
     
     // Update required fields list in summary
     updateSummaryRequiredFields(requiredFields, completedFields);
+    
+    // Update collapsed sidebar dots
+    updateSidebarDots();
 }
 
 function updateSummaryRequiredFields(requiredFields, completedFields) {
@@ -1348,6 +1666,12 @@ function collectFormData() {
             break;
     }
     
+    if (prefillContext.title && prefillContext.title.trim()) {
+        formData.title = prefillContext.title.trim();
+    }
+    
+    formData.department = prefillContext.department || 'Legal Operations';
+    
     return formData;
 }
 
@@ -1485,7 +1809,7 @@ function confirmAndSubmit() {
             title: formData.title,
             type: formData.type,
             priority: 'Medium', // Default priority for LOPS requests
-            department: 'Legal Operations',
+            department: formData.department || 'Legal Operations',
             description: JSON.stringify(formData, null, 2),
             files: formData.signatureDetails?.files || []
         };
@@ -1504,9 +1828,26 @@ function confirmAndSubmit() {
 // Initialization
 // ============================================
 
+let formResizeObserver;
+
+function initSidebarObserver() {
+    const formMain = document.querySelector('.form-main');
+    if (formMain && !formResizeObserver) {
+        formResizeObserver = new ResizeObserver(() => {
+            updateDotPositions();
+        });
+        formResizeObserver.observe(formMain);
+    }
+    
+    window.addEventListener('resize', () => {
+        updateDotPositions();
+    });
+}
+
 onReady(() => {
     // Set default user
     initializeDefaultUser();
+    loadPrefillContext();
     
     // Get section references
     signatureSection = document.getElementById('signatureSection');
@@ -1518,6 +1859,52 @@ onReady(() => {
     countryField = document.getElementById('countryField');
     apostilleCountryField = document.getElementById('apostilleCountryField');
     mailingAddressSection = document.getElementById('mailingAddressSection');
+    
+    // Initialize summary panel toggle elements
+    summaryPanelToggle = document.getElementById('summaryPanelToggle');
+    summaryPanelClose = document.getElementById('summaryPanelClose');
+    formLayout = document.querySelector('.form-layout');
+    summarySidebarDots = document.getElementById('summarySidebarDots');
+        summarySidebarCollapsed = document.getElementById('summarySidebarCollapsed');
+    prefillBanner = document.getElementById('prefillContextBanner');
+    prefillBannerDetails = document.getElementById('prefillContextDetails');
+    prefillBannerAction = document.getElementById('clearPrefillContextBtn');
+    
+    if (prefillBannerAction) {
+        prefillBannerAction.addEventListener('click', clearPrefillContext);
+    }
+    
+    // Load saved summary panel state
+    loadSummaryPanelState();
+    
+    // Initialize sidebar dots
+    updateSidebarDots();
+    
+    // Initialize sidebar position observer
+    initSidebarObserver();
+    
+    // Summary panel toggle event listeners
+    if (summaryPanelToggle) {
+        summaryPanelToggle.addEventListener('click', () => {
+            toggleSummaryPanel(false); // Show the panel
+        });
+    }
+    
+    if (summaryPanelClose) {
+        summaryPanelClose.addEventListener('click', () => {
+            toggleSummaryPanel(true); // Hide the panel
+        });
+    }
+    
+    // Keyboard shortcut: Bracket key to toggle summary panel
+    document.addEventListener('keydown', (e) => {
+        // Use ']' to toggle summary panel when not in an input field
+        if (e.key === ']' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+            e.preventDefault();
+            const isCollapsed = formLayout?.classList.contains('summary-collapsed');
+            toggleSummaryPanel(!isCollapsed);
+        }
+    });
     
     // Initialize people picker
     submittingForOtherPicker = createPeoplePicker('submittingForOther', {
@@ -1674,6 +2061,8 @@ onReady(() => {
             }
         });
     }
+    
+    applyPrefillContext();
     
     // Initialize progress and summary
     updateProgress();

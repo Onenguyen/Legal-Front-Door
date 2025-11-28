@@ -1,0 +1,7 @@
+/* Global reset and box sizing */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+

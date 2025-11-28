@@ -1,0 +1,138 @@
+/* Navigation Bar - Cohesity Style */
+.navbar {
+    background: #FFFFFF;
+    color: var(--text-primary);
+    padding: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: none;
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.75rem 2rem;
+    display: flex;
+    align-items: center;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.nav-brand img {
+    height: clamp(20px, 3vw, 26px);
+    width: auto;
+    max-width: 100%;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    margin-left: auto;
+}
+
+.nav-links a {
+    color: #000000;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 800;
+    padding: 0.5rem 0;
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 0;
+    position: relative;
+}
+
+.nav-links a:hover {
+    color: #000000;
+}
+
+.nav-links a.active {
+    color: #000000;
+    font-weight: 700;
+}
+
+.nav-links a.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1rem;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: var(--primary-color);
+}
+
+/* Right side navigation items */
+.nav-actions {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    margin-left: 2rem;
+}
+
+/* Legacy styles for backward compatibility */
+.user-name {
+    color: var(--text-secondary);
+    font-weight: 400;
+    padding: 0.5rem 0;
+    font-size: 0.9375rem;
+    letter-spacing: -0.01em;
+    text-transform: none;
+}
+
+/* Responsive Navigation */
+@media (max-width: 900px) {
+    .nav-container {
+        padding: 1rem 2rem;
+    }
+    
+    .nav-links {
+        gap: 1.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .nav-actions {
+        gap: 0.875rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .nav-container {
+        flex-direction: column;
+        gap: 0;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .nav-brand {
+        padding: 0.75rem 0;
+    }
+    
+    .nav-links {
+        width: 100%;
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .nav-links a,
+    .user-name,
+    .logout-link {
+        width: 100%;
+        text-align: center;
+        border-left: none;
+        border-right: none;
+        border-bottom: 0.5px solid var(--separator-translucent);
+    }
+    
+    .nav-links a.active::after {
+        display: none;
+    }
+}
+

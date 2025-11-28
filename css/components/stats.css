@@ -1,0 +1,113 @@
+/* Stats Container - Cohesity Style */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: #FFFFFF;
+    border: 2px solid #000000;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 3px 3px 0px #000000;
+    text-align: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.05s; }
+.stat-card:nth-child(2) { animation-delay: 0.1s; }
+.stat-card:nth-child(3) { animation-delay: 0.15s; }
+.stat-card:nth-child(4) { animation-delay: 0.2s; }
+.stat-card:nth-child(5) { animation-delay: 0.25s; }
+
+.stat-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px var(--primary-color);
+    border-color: #000000;
+}
+
+.stat-card.active {
+    background: #FFFFFF;
+    border-color: var(--primary-color);
+}
+
+.stat-card.active .stat-value {
+    color: var(--primary-color);
+}
+
+.stat-card.active .stat-label {
+    color: var(--text-secondary);
+}
+
+.stat-card.active:hover {
+    box-shadow: 5px 5px 0px var(--primary-color);
+}
+
+.stat-value {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.04em;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+/* Quick Stats (Home Page) */
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    padding: 2rem;
+}
+
+.stat-number {
+    font-size: 3.5rem;
+}
+
+/* Responsive Stats */
+@media (max-width: 900px) {
+    .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .stats-container {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+    
+    .quick-stats {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+        padding: 1.5rem 1rem;
+    }
+    
+    .stat-number {
+        font-size: 2.75rem;
+    }
+    
+    .stat-value {
+        font-size: 2.5rem;
+    }
+    
+    .stat-card {
+        padding: 1.75rem;
+    }
+}
+

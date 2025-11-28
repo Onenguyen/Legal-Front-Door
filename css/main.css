@@ -1,40 +1,47 @@
 /* 
- * Main CSS Entry Point
+ * Main CSS Entry Point - Cohesity Legal Front Door
  * 
- * This file serves as the main entry point for all styles.
- * Currently imports the consolidated styles.css for backward compatibility.
- * 
- * Future Modularization Plan:
- * - Split styles.css into:
- *   - base/variables.css (CSS custom properties)
- *   - base/reset.css (normalize/reset styles)
- *   - base/typography.css (fonts and text styles)
- *   - components/*.css (navbar, cards, buttons, etc.)
- *   - layouts/*.css (container, grid systems)
- *   - pages/*.css (page-specific styles)
- * 
- * For now, we maintain the existing styles.css to avoid breaking changes.
+ * This file serves as the main entry point for all styles,
+ * organized into logical modules for maintainability.
  */
 
-@import url('styles.css');
+/* =================================================================
+   Base Styles - Foundation of the design system
+   ================================================================= */
+@import url('base/variables.css');
+@import url('base/reset.css');
+@import url('base/typography.css');
+@import url('base/animations.css');
 
-/* 
- * Additional imports can be added here as modules are extracted:
- * @import url('base/variables.css');
- * @import url('base/reset.css');
- * @import url('base/typography.css');
- * @import url('components/navbar.css');
- * @import url('components/cards.css');
- * @import url('components/buttons.css');
- * @import url('components/badges.css');
- * @import url('components/forms.css');
- * @import url('components/filters.css');
- * @import url('components/chatbot.css');
- * @import url('components/timeline.css');
- * @import url('layouts/container.css');
- * @import url('layouts/grid.css');
- * @import url('pages/home.css');
- * @import url('pages/requests.css');
- * @import url('pages/detail.css');
- */
+/* =================================================================
+   Layout Styles - Page structure and containers
+   ================================================================= */
+@import url('layouts/container.css');
+@import url('layouts/detail.css');
 
+/* =================================================================
+   Component Styles - Reusable UI components
+   ================================================================= */
+@import url('components/navbar.css');
+@import url('components/cards.css');
+@import url('components/buttons.css');
+@import url('components/badges.css');
+@import url('components/forms.css');
+@import url('components/search.css');
+@import url('components/filters.css');
+@import url('components/stats.css');
+@import url('components/tables.css');
+@import url('components/tabs.css');
+@import url('components/timeline.css');
+@import url('components/comments.css');
+@import url('components/modals.css');
+@import url('components/chatbot.css');
+@import url('components/alerts.css');
+@import url('components/requests.css');
+@import url('components/people-picker.css');
+
+/* =================================================================
+   Page-Specific Styles
+   ================================================================= */
+@import url('pages/home.css');
+@import url('pages/lops-intake.css');

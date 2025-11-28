@@ -13,7 +13,6 @@ let currentUser = null;
 let selectedRequestId = null;
 const assignModalElements = {
     modal: null,
-    description: null,
     select: null,
     confirmBtn: null,
     cancelBtn: null,
@@ -102,6 +101,7 @@ function applyFilters() {
     const filterValues = getFilterValues(multiSelects);
     const filtered = filterRequests(allRequests, filterValues);
     displayRequestsTable(filtered);
+    updateStats(allRequests);
 }
 
 // Set active stat card
@@ -227,7 +227,6 @@ function enableColumnResizing() {
 // Assignment modal helpers
 function initializeAssignModal() {
     assignModalElements.modal = document.getElementById('assignModal');
-    assignModalElements.description = document.getElementById('assignModalDescription');
     assignModalElements.select = document.getElementById('assignUserSelect');
     assignModalElements.confirmBtn = document.getElementById('confirmAssignBtn');
     assignModalElements.cancelBtn = document.getElementById('cancelAssignBtn');
@@ -284,10 +283,6 @@ function openAssignModal(requestId) {
     selectedRequestId = requestId;
     populateAssignOptions(request.assignedTo || '');
     
-    if (assignModalElements.description) {
-        assignModalElements.description.textContent = `Assign "${request.title}" (REQ-${request.id}) to an admin.`;
-    }
-    
     assignModalElements.modal.style.display = 'flex';
 }
 
@@ -329,6 +324,7 @@ function handleAssignConfirm() {
         applyFilters();
     } else {
         displayRequestsTable(allRequests);
+        updateStats(allRequests);
     }
 }
 

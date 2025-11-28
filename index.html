@@ -14,9 +14,34 @@
 
     <!-- Hero Section -->
     <div class="hero-section">
+        <div class="hero-background-container">
+            <div class="hero-bg-orb hero-bg-orb-1"></div>
+            <div class="hero-bg-orb hero-bg-orb-2"></div>
+            <div class="hero-bg-orb hero-bg-orb-3"></div>
+        </div>
         <div class="hero-content">
-            <h1>Everything Cohesity Legal.<br><span class="hero-highlight">All in One Place</span></h1>
+            <h1>
+                <span class="hero-title-text">
+                    <span class="hero-word" style="--word-index: 0">Everything</span>
+                    <span class="hero-word" style="--word-index: 1">Cohesity</span>
+                    <span class="hero-word" style="--word-index: 2">Legal.</span>
+                </span>
+                <br>
+                <span class="hero-highlight">All in One Place</span>
+            </h1>
             <p>Your centralized portal for all legal services and support at Cohesity</p>
+            
+            <!-- Hero Search -->
+            <div class="hero-search-container">
+                <div class="search-input-wrapper">
+                    <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2.5" fill="none"/>
+                        <path d="M17 17L22 22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <input type="text" id="heroSearchInput" placeholder="Search for forms..." autocomplete="off">
+                </div>
+                <div id="searchResults" class="search-results-dropdown"></div>
+            </div>
         </div>
     </div>
 
@@ -26,7 +51,6 @@
         <div id="favoritesSection" style="display: none;">
             <div class="section-header">
                 <h2>Favorite Forms</h2>
-                <p>Quick launch your most used forms</p>
             </div>
             <div class="favorites-grid" id="favoritesGrid">
                 <!-- Favorites will be populated by JS -->

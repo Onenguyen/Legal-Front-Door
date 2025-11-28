@@ -1,23 +1,23 @@
 // Home Page Logic
 import { getCurrentUser, setCurrentUser, getUserFavorites } from '../core/state.js';
 import { getUsers } from '../core/state.js';
-import { DEPARTMENT_OPTIONS } from '../core/constants.js';
+import { DEPARTMENT_OPTIONS, INTAKE_FORMS, ICON_TYPES } from '../core/constants.js';
 import { renderDepartmentCard } from '../components/request-card.js';
 import { renderChatbot, initChatbot } from '../components/chatbot.js';
+import { getIcon } from '../components/icons.js';
 import { escapeHtml, onReady } from '../utils/dom.js';
 
 // Launch favorite
 function launchFavorite(favorite) {
-    if (favorite.prefill) {
-        if (favorite.prefill.department) {
-            sessionStorage.setItem('prefilledDepartment', favorite.prefill.department);
-        }
-        if (favorite.prefill.type) {
-            sessionStorage.setItem('prefilledRequestType', favorite.prefill.type);
-        }
-        if (favorite.prefill.title) {
-            sessionStorage.setItem('prefilledTitle', favorite.prefill.title);
-        }
+    const prefill = favorite?.prefill || {};
+    if (prefill.department) {
+        sessionStorage.setItem('prefilledDepartment', prefill.department);
+    }
+    if (prefill.type) {
+        sessionStorage.setItem('prefilledRequestType', prefill.type);
+    }
+    if (prefill.title) {
+        sessionStorage.setItem('prefilledTitle', prefill.title);
     }
     window.location.href = 'lops-general-intake.html';
 }
@@ -41,8 +41,10 @@ function renderFavorites() {
 
         if (favorites.length > 0 && favoritesGrid && favoritesSection) {
             favoritesSection.style.display = 'block';
-            favoritesGrid.innerHTML = favorites.map(fav => `
-                <div class="favorite-card" data-fav-id="${escapeHtml(fav.id)}">
+            favoritesGrid.innerHTML = favorites.map(fav => {
+                const prefill = fav.prefill || {};
+                return `
+                <div class="favorite-card" data-fav-id="${escapeHtml(fav.id)}" role="button" tabindex="0" aria-label="Launch ${escapeHtml(fav.name)} favorite">
                     <div class="favorite-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -50,7 +52,7 @@ function renderFavorites() {
                     </div>
                     <div class="favorite-info">
                         <h3>${escapeHtml(fav.name)}</h3>
-                        <p>${escapeHtml(fav.prefill.department || 'General')} • ${escapeHtml(fav.prefill.type || 'Request')}</p>
+                        <p>${escapeHtml(prefill.department || 'General')} • ${escapeHtml(prefill.type || 'Request')}</p>
                     </div>
                     <div class="favorite-arrow">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -59,7 +61,8 @@ function renderFavorites() {
                         </svg>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
             
             // Attach click handlers using data attributes (safer than inline JSON)
             favoritesGrid.querySelectorAll('.favorite-card').forEach(card => {
@@ -67,6 +70,12 @@ function renderFavorites() {
                     const favId = card.dataset.favId;
                     const fav = favorites.find(f => f.id === favId);
                     if (fav) launchFavorite(fav);
+                });
+                card.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        card.click();
+                    }
                 });
             });
         }
@@ -100,6 +109,123 @@ function renderDepartmentCards() {
 // m3 FIX: Store observer references for cleanup
 let statsObserver = null;
 let revealObserver = null;
+
+// Search functionality
+function setupSearch() {
+    const searchInput = document.getElementById('heroSearchInput');
+    const searchResults = document.getElementById('searchResults');
+    let selectedIndex = -1;
+    
+    if (!searchInput || !searchResults) return;
+
+    function performSearch(query) {
+        if (!query || query.length < 2) {
+            searchResults.classList.remove('show');
+            selectedIndex = -1;
+            return;
+        }
+
+        const normalizedQuery = query.toLowerCase();
+        
+        // Filter Forms
+        const matchedForms = INTAKE_FORMS.filter(form => 
+            form.label.toLowerCase().includes(normalizedQuery) || 
+            form.description.toLowerCase().includes(normalizedQuery) ||
+            (form.keywords && form.keywords.some(k => k.toLowerCase().includes(normalizedQuery)))
+        );
+
+        if (matchedForms.length === 0) {
+            searchResults.innerHTML = '<div class="no-results">No matches found</div>';
+            searchResults.classList.add('show');
+            selectedIndex = -1;
+            return;
+        }
+
+        let html = '';
+
+        if (matchedForms.length > 0) {
+            html += '<div class="search-result-category">Forms</div>';
+            html += matchedForms.map(form => `
+                <div class="search-result-item" role="button" onclick="navigateToForm('${escapeHtml(form.url)}')">
+                    <div class="search-result-icon">
+                        ${getIcon(ICON_TYPES.CONTRACT, 20)}
+                    </div>
+                    <div class="search-result-content">
+                        <div class="search-result-title">${escapeHtml(form.label)}</div>
+                        <div class="search-result-subtitle">${escapeHtml(form.description)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        searchResults.innerHTML = html;
+        searchResults.classList.add('show');
+        selectedIndex = -1;
+    }
+
+    searchInput.addEventListener('input', (e) => {
+        performSearch(e.target.value);
+    });
+
+    searchInput.addEventListener('focus', () => {
+        if (searchInput.value.length >= 2) {
+            searchResults.classList.add('show');
+        }
+    });
+
+    // Keyboard Navigation
+    searchInput.addEventListener('keydown', (e) => {
+        const items = searchResults.querySelectorAll('.search-result-item');
+        if (!items.length) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectedIndex = (selectedIndex + 1) % items.length;
+            updateSelection(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+            updateSelection(items);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (selectedIndex >= 0 && items[selectedIndex]) {
+                items[selectedIndex].click();
+            }
+        } else if (e.key === 'Escape') {
+            searchResults.classList.remove('show');
+            searchInput.blur();
+        }
+    });
+
+    function updateSelection(items) {
+        items.forEach((item, index) => {
+            if (index === selectedIndex) {
+                item.classList.add('highlighted');
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.classList.remove('highlighted');
+            }
+        });
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.classList.remove('show');
+        }
+    });
+    
+    // Global handler for request type navigation from search
+    window.navigateToRequestType = function(type) {
+        sessionStorage.setItem('prefilledRequestType', type);
+        window.location.href = 'lops-general-intake.html';
+    };
+
+    // Global handler for form navigation from search
+    window.navigateToForm = function(url) {
+        window.location.href = url;
+    };
+}
 
 // Initialize animations (counter, reveal)
 function initAnimations() {
@@ -181,6 +307,9 @@ onReady(() => {
     
     // Initialize chatbot
     initChatbot();
+    
+    // Initialize search
+    setupSearch();
     
     // Initialize animations
     initAnimations();

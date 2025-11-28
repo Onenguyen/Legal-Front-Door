@@ -1,0 +1,187 @@
+/* Timeline - Vertical Style */
+.timeline {
+    position: relative;
+    padding-left: 2.75rem;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--separator-translucent), var(--separator-translucent) 50%, transparent);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -1.875rem;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    background-color: var(--primary-color);
+    border: 2px solid var(--background);
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(0, 255, 163, 0.15);
+}
+
+.timeline-content {
+    background-color: var(--fill-tertiary);
+    padding: 1.25rem;
+    border: 1px solid var(--separator-translucent);
+    border-radius: 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.timeline-content:hover {
+    background-color: var(--fill-secondary);
+    border-color: var(--separator-opaque);
+    transform: translateX(4px);
+}
+
+.timeline-event {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.375rem;
+    font-size: 0.9375rem;
+    letter-spacing: -0.01em;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.timeline-date {
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+    letter-spacing: -0.01em;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+/* Timeline Horizontal - Compact Design */
+.timeline-horizontal {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    padding: 1rem 0 1.5rem 0;
+    position: relative;
+    scrollbar-width: thin;
+    scrollbar-color: var(--separator-opaque) transparent;
+}
+
+.timeline-horizontal::-webkit-scrollbar {
+    height: 6px;
+}
+
+.timeline-horizontal::-webkit-scrollbar-track {
+    background: var(--fill-tertiary);
+    border-radius: 3px;
+}
+
+.timeline-horizontal::-webkit-scrollbar-thumb {
+    background-color: var(--separator-opaque);
+    border-radius: 3px;
+}
+
+.timeline-horizontal::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 28px;
+    height: 2px;
+    background: linear-gradient(to right, var(--primary-color), var(--separator-translucent) 15%, var(--separator-translucent) 85%, transparent);
+    z-index: 0;
+}
+
+.timeline-horizontal .timeline-item {
+    flex: 0 0 auto;
+    min-width: 180px;
+    margin-bottom: 0;
+    padding: 0 1rem;
+    text-align: center;
+    position: relative;
+}
+
+.timeline-horizontal .timeline-item:first-child {
+    padding-left: 0;
+}
+
+.timeline-horizontal .timeline-item:last-child {
+    padding-right: 0;
+}
+
+.timeline-horizontal .timeline-dot {
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    width: 12px;
+    height: 12px;
+    margin: 0 auto 1rem auto;
+    z-index: 1;
+    background-color: var(--primary-color);
+    border: 2px solid #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(0, 255, 163, 0.2);
+}
+
+.timeline-horizontal .timeline-item:first-child .timeline-dot {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(0, 255, 163, 0.25);
+}
+
+.timeline-horizontal .timeline-content {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.timeline-horizontal .timeline-content:hover {
+    transform: none;
+    background: transparent;
+}
+
+.timeline-horizontal .timeline-event {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    line-height: 1.3;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.timeline-horizontal .timeline-date {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.timeline-card-horizontal {
+    background: linear-gradient(135deg, rgba(0, 255, 163, 0.03) 0%, var(--surface-primary) 100%);
+}
+
+/* Timeline in Tab */
+.tab-content #timeline {
+    padding-left: 2.75rem;
+    position: relative;
+}
+
+.tab-content #timeline::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--separator-translucent), var(--separator-translucent) 50%, transparent);
+}
+
+.tab-content #timeline .timeline-item {
+    animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+

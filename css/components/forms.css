@@ -1,0 +1,257 @@
+/* Forms - Cohesity Style */
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    letter-spacing: -0.01em;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #000000;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    color: #000000;
+    font-size: 0.9375rem;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    transition: all 0.15s ease;
+    letter-spacing: -0.01em;
+    box-shadow: 2px 2px 0px #000000;
+}
+
+.form-control:hover {
+    border-color: #000000;
+    box-shadow: 4px 4px 0px #000000;
+    transform: translate(-1px, -1px);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 4px 4px 0px #000000;
+    background-color: #FFFFFF;
+    transform: translate(-1px, -1px);
+}
+
+.form-control::placeholder {
+    color: var(--text-tertiary);
+}
+
+select.form-control {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%231D1D1F' stroke-opacity='0.56' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 140px;
+    line-height: 1.6;
+}
+
+/* Number Counter Input */
+.number-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    border: 2px solid #000000;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #FFFFFF;
+}
+
+.number-counter .counter-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: var(--background-secondary);
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.number-counter .counter-btn:hover {
+    background: var(--primary-color);
+    color: #000000;
+}
+
+.number-counter .counter-btn:active {
+    transform: scale(0.95);
+}
+
+.number-counter .counter-decrement {
+    border-right: 1px solid var(--separator-opaque);
+}
+
+.number-counter .counter-increment {
+    border-left: 1px solid var(--separator-opaque);
+}
+
+.number-counter .counter-input {
+    width: 60px;
+    height: 40px;
+    border: none;
+    border-radius: 0;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0;
+    background: #FFFFFF;
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.number-counter .counter-input::-webkit-outer-spin-button,
+.number-counter .counter-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.number-counter .counter-input:focus {
+    outline: none;
+    box-shadow: none;
+    transform: none;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.form-text {
+    display: block;
+    margin-top: 0.625rem;
+    color: var(--text-tertiary);
+    font-size: 0.875rem;
+    letter-spacing: 0;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 3rem;
+    padding-top: 3rem;
+    border-top: 0.5px solid var(--separator-translucent);
+}
+
+/* Status Text - Plain styling */
+.status-text {
+    font-weight: 400;
+}
+
+/* File Input Styles */
+input[type="file"].form-control {
+    padding: 0.5rem;
+    cursor: pointer;
+    background: #FFFFFF;
+    border: 2px solid #000000;
+    border-radius: 6px;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+    height: auto;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+input[type="file"].form-control:hover {
+    border-color: #000000;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+    transform: translate(-1px, -1px);
+}
+
+input[type="file"]::file-selector-button {
+    margin-right: 1rem;
+    padding: 0.375rem 0.75rem;
+    border: 2px solid #000000;
+    background: var(--background-secondary);
+    color: var(--text-primary);
+    border-radius: 4px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background: var(--primary-color);
+    color: #000000;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+}
+
+/* Form Validation Styles */
+.form-control:invalid:not(:focus):not(:placeholder-shown) {
+    border-color: var(--priority-urgent);
+}
+
+.form-control:valid:not(:focus):not(:placeholder-shown) {
+    border-color: #000000;
+}
+
+.form-group.error .form-control {
+    border-color: var(--priority-urgent);
+}
+
+.form-group.error .form-text {
+    color: var(--priority-urgent);
+}
+
+.form-group.success .form-control {
+    border-color: #000000;
+}
+
+/* Loading State */
+.form-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.form-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    margin: -16px 0 0 -16px;
+    border: 3px solid var(--fill-tertiary);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Responsive Form Styles */
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+

@@ -38,6 +38,7 @@ const domElements = {
     assignSelect: null,
     commentsCard: null,
     commentsSection: null,
+    commentsToggleWrapper: null,
     showMoreCommentsBtn: null,
     timeline: null,
     actionMenuContainer: null
@@ -62,6 +63,7 @@ function initDomCache() {
     domElements.assignSelect = document.getElementById('assignSelect');
     domElements.commentsCard = document.getElementById('commentsCard');
     domElements.commentsSection = document.getElementById('commentsSection');
+    domElements.commentsToggleWrapper = document.getElementById('commentsToggleWrapper');
     domElements.showMoreCommentsBtn = document.getElementById('showMoreCommentsBtn');
     domElements.timeline = document.getElementById('timeline');
     domElements.actionMenuContainer = document.getElementById('actionMenuContainer');
@@ -80,11 +82,11 @@ const WET_INK_OPTION_LABELS = {
 };
 
 const NOTARIAL_ACT_LABELS = {
-    acknowledgements: 'Acknowledgements',
-    jurats: 'Jurats',
-    oathsAffirmations: 'Oaths & Affirmations',
-    witnessing: 'Witnessing / attesting a signature',
-    certifiedCopy: 'Certified copy'
+    acknowledgements: 'Acknowledgment',
+    jurats: 'Jurat',
+    oathsAffirmations: 'Oath/Affirmation',
+    witnessing: 'Signature Witnessing',
+    certifiedCopy: 'Certified Copy'
 };
 
 const WET_INK_ORIGINALS_LABELS = {
@@ -256,49 +258,89 @@ function loadTimeline() {
     `).join('');
 }
 
-// Load comments - m6 FIX: Use cached elements
+function getInitials(name) {
+    if (!name) return '?';
+    const parts = name.split(' ');
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
+// Load comments - Social Media Style
 function loadComments() {
     if (!currentRequest) return;
     
     const requestId = currentRequest.id;
     const comments = getRequestComments(requestId);
     const commentsSection = domElements.commentsSection;
-    const showMoreBtn = domElements.showMoreCommentsBtn;
     
     if (!commentsSection) return;
     
     if (comments.length === 0) {
-        commentsSection.innerHTML = '<p class="no-comments">No comments yet.</p>';
-        if (showMoreBtn) showMoreBtn.style.display = 'none';
+        commentsSection.innerHTML = `
+            <div class="no-comments">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                </svg>
+                <p style="font-family: 'Space Grotesk', sans-serif;">No comments yet.<br>Start the conversation!</p>
+            </div>
+        `;
+        updateCommentsToggle(0);
         return;
     }
     
-    // Sort comments by timestamp (most recent first)
-    const sortedComments = [...comments].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    // Sort comments by timestamp (oldest first for chat view)
+    const sortedComments = [...comments].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    const visibleComments = showAllComments
+        ? sortedComments
+        : sortedComments.slice(Math.max(sortedComments.length - INITIAL_COMMENTS_COUNT, 0));
     
-    // Determine how many comments to show
-    const commentsToShow = showAllComments ? sortedComments : sortedComments.slice(0, INITIAL_COMMENTS_COUNT);
-    
-    commentsSection.innerHTML = commentsToShow.map(comment => `
-        <div class="comment">
-            <div class="comment-header">
-                <strong>${escapeHtml(getUserName(comment.userId))}</strong>
-                <span class="comment-date">${formatDateTime(comment.timestamp)}</span>
+    commentsSection.innerHTML = visibleComments.map(comment => {
+        const isOwn = currentUser && comment.userId === currentUser.id;
+        const userName = getUserName(comment.userId);
+        const initials = getInitials(userName);
+        
+        return `
+        <div class="comment-item ${isOwn ? 'own-comment' : ''}">
+            <div class="comment-avatar" title="${escapeHtml(userName)}">
+                ${initials}
             </div>
-            <div class="comment-body">${escapeHtml(comment.text)}</div>
+            <div class="comment-content-wrapper">
+                ${!isOwn ? `<div class="comment-author-header">${escapeHtml(userName)}</div>` : ''}
+                <div class="comment-bubble">
+                    <div class="comment-text">${escapeHtml(comment.text)}</div>
+                </div>
+                <div class="comment-meta">
+                    ${formatDateTime(comment.timestamp)}
+                </div>
+            </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
     
-    // Show/hide the "Show More" button
-    if (showMoreBtn) {
-        if (sortedComments.length > INITIAL_COMMENTS_COUNT) {
-            showMoreBtn.style.display = 'flex';
-            showMoreBtn.textContent = showAllComments 
-                ? `Show Less Comments` 
-                : `Show More Comments (${sortedComments.length - INITIAL_COMMENTS_COUNT} more)`;
-        } else {
-            showMoreBtn.style.display = 'none';
-        }
+    updateCommentsToggle(sortedComments.length);
+    
+    // Scroll to bottom
+    setTimeout(() => {
+        commentsSection.scrollTop = commentsSection.scrollHeight;
+    }, 50);
+}
+
+function updateCommentsToggle(totalCount) {
+    const wrapper = domElements.commentsToggleWrapper;
+    const toggleBtn = domElements.showMoreCommentsBtn;
+    
+    if (totalCount <= INITIAL_COMMENTS_COUNT) {
+        if (wrapper) wrapper.classList.remove('show');
+        if (toggleBtn) toggleBtn.style.display = 'none';
+        return;
+    }
+    
+    if (wrapper) wrapper.classList.add('show');
+    if (toggleBtn) {
+        toggleBtn.style.display = 'inline-flex';
+        toggleBtn.textContent = showAllComments
+            ? 'Show recent comments'
+            : `Show all ${totalCount} comments`;
     }
 }
 
@@ -734,22 +776,31 @@ onReady(() => {
     // Add comment
     const addCommentBtn = document.getElementById('addCommentBtn');
     const newCommentInput = document.getElementById('newComment');
-    if (addCommentBtn && newCommentInput && currentRequest) {
-        addCommentBtn.addEventListener('click', function() {
+    
+    function submitComment() {
+        if (!currentRequest) return;
+        
             if (!currentUser) {
                 alert('Please log in to add comments');
                 return;
             }
             
             const commentText = newCommentInput.value.trim();
-            if (!commentText) {
-                alert('Please enter a comment');
-                return;
-            }
+        if (!commentText) return;
             
             addComment(currentRequest.id, currentUser.id, commentText);
             newCommentInput.value = '';
             loadComments();
+    }
+
+    if (addCommentBtn && newCommentInput && currentRequest) {
+        addCommentBtn.addEventListener('click', submitComment);
+        
+        newCommentInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitComment();
+            }
         });
     }
     

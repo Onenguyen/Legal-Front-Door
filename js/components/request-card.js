@@ -6,6 +6,23 @@ import { escapeHtml, truncateText, toTitleCase, getStatusClass } from '../utils/
 import { formatDate } from '../utils/date.js';
 
 /**
+ * Get the file count from a request's description
+ * @param {Object} request - The request object
+ * @returns {number} Number of files attached
+ */
+function getFileCount(request) {
+    try {
+        const data = JSON.parse(request.description);
+        if (data.helpType === 'signature' && data.signatureDetails?.files) {
+            return data.signatureDetails.files.length;
+        }
+    } catch (e) {
+        // Not JSON or no files
+    }
+    return 0;
+}
+
+/**
  * Parse request description JSON and extract meaningful details
  * @param {Object} request - The request object
  * @returns {Object} Parsed details for display
@@ -36,12 +53,18 @@ function parseRequestDetails(request) {
             details.items.push({ label: 'Form', value: request.type });
         }
         
-        // Handle different help types
-        if (data.helpType === 'signature' && data.signatureDetails) {
-            if (data.signatureDetails.files && data.signatureDetails.files.length > 0) {
-                details.items.push({ label: 'Files', value: `${data.signatureDetails.files.length} attached` });
-            }
-        } else if (data.helpType === 'contractPull' && data.contractPullDetails) {
+        // Add requester
+        if (request.submittedBy) {
+            details.items.push({ label: 'Requester', value: getUserName(request.submittedBy) });
+        }
+        
+        // Add submitted date
+        if (request.submittedDate) {
+            details.items.push({ label: 'Submitted', value: formatDate(request.submittedDate) });
+        }
+        
+        // Handle different help types (excluding files)
+        if (data.helpType === 'contractPull' && data.contractPullDetails) {
             if (data.contractPullDetails.agreementName) {
                 details.items.push({ label: 'Agreement', value: truncateText(data.contractPullDetails.agreementName, 30) });
             }
@@ -72,6 +95,9 @@ export function renderRequestCard(request) {
     const submitterName = getUserName(request.submittedBy);
     const details = parseRequestDetails(request);
     const statusClass = getStatusClass(request.status);
+    const detailUrl = `${ROUTES.REQUEST_DETAIL}?id=${encodeURIComponent(request.id)}`;
+    const safeTitle = escapeHtml(request.title);
+    const fileCount = getFileCount(request);
     
     // Build details list HTML
     const detailsHtml = details.items.length > 0 
@@ -86,28 +112,24 @@ export function renderRequestCard(request) {
         : '';
     
     return `
-        <div class="request-card" onclick="window.location.href='${ROUTES.REQUEST_DETAIL}?id=${escapeHtml(request.id)}'">
+        <div class="request-card" role="button" tabindex="0" aria-label="View details for request ${safeTitle}" onclick="window.location.href='${detailUrl}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='${detailUrl}';}">
             <div class="card-icon ${icon.class}">
                 ${icon.svg}
             </div>
             
             <div class="request-header-main">
-                <h3 class="request-title">${escapeHtml(request.title)}</h3>
+                <h3 class="request-title">${safeTitle}</h3>
                 <span class="status-badge ${statusClass}">${escapeHtml(request.status)}</span>
             </div>
             
-            <div class="request-meta-info">
-                <span class="meta-id">REQ-${escapeHtml(request.id)}</span>
-                <span class="meta-separator">•</span>
-                <span>${escapeHtml(submitterName)}</span>
-                <span class="meta-separator">•</span>
-                <span>${formatDate(request.submittedDate)}</span>
-                ${request.priority !== 'Medium' ? `<span class="meta-separator">•</span><span class="${PRIORITY_CLASSES[request.priority]}">${escapeHtml(request.priority)}</span>` : ''}
-            </div>
-            
-            ${detailsHtml}
+${detailsHtml}
             
             <div class="request-footer">
+                ${fileCount > 0 ? `
+                <div class="file-count">
+                    ${fileCount} ${fileCount === 1 ? 'file' : 'files'}
+                </div>
+                ` : ''}
                 <div class="assigned-user">
                     ${assignedUserName ? `
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

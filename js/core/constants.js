@@ -172,3 +172,14 @@ export const ROUTES = {
     ADMIN_DASHBOARD: 'admin-dashboard.html'
 };
 
+// Intake Forms
+export const INTAKE_FORMS = [
+    {
+        id: 'lops-general-intake',
+        label: 'Legal Operations General Intake',
+        description: 'General request form for Legal Operations support',
+        url: 'lops-general-intake.html',
+        keywords: ['legal', 'operations', 'general', 'intake', 'request', 'support']
+    }
+];
+

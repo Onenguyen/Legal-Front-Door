@@ -1,0 +1,173 @@
+/* People Picker Styles - Cohesity Brand */
+.people-picker {
+    position: relative;
+    width: 100%;
+}
+
+.people-picker-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.people-picker-input {
+    padding-right: 2.5rem;
+    cursor: pointer;
+    background-color: #FFFFFF;
+}
+
+.people-picker-actions {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    z-index: 5;
+}
+
+.people-picker-toggle,
+.people-picker-clear {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+.people-picker-toggle:hover,
+.people-picker-clear:hover {
+    color: var(--text-primary);
+}
+
+.people-picker-clear {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.people-picker-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    width: 100%;
+    background: #FFFFFF;
+    border: 2px solid #000000;
+    border-radius: 6px;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 0.75rem;
+    display: none;
+    animation: fadeInUp 0.2s ease;
+}
+
+.people-picker.is-open .people-picker-dropdown {
+    display: block;
+}
+
+.people-picker-search {
+    margin-bottom: 0.75rem;
+}
+
+.people-picker-search-input {
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid var(--separator-opaque);
+    border-radius: 4px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.875rem;
+    background: var(--background-secondary);
+    transition: all 0.2s ease;
+}
+
+.people-picker-search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: #FFFFFF;
+    box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.people-picker-list {
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--separator-opaque) transparent;
+}
+
+.people-picker-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.people-picker-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.people-picker-list::-webkit-scrollbar-thumb {
+    background-color: var(--separator-opaque);
+    border-radius: 4px;
+}
+
+.people-picker-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.people-picker-item:hover {
+    background-color: var(--fill-tertiary);
+}
+
+.people-picker-item-avatar {
+    width: 32px;
+    height: 32px;
+    background-color: var(--primary-color);
+    color: #000000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    border: 2px solid #000000;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.people-picker-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.people-picker-item-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    margin-bottom: 0.125rem;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.people-picker-item-details {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.people-picker-empty {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 0.875rem;
+    font-family: 'Space Grotesk', sans-serif;
+}
+

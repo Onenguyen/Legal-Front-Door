@@ -1,0 +1,188 @@
+/* Search Component Styles */
+.hero-search-container {
+    max-width: 600px;
+    margin: 1.5rem auto 0;
+    position: relative;
+    z-index: 100;
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s backwards;
+}
+
+.search-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.search-input-wrapper input {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 3.5rem;
+    font-size: 1.25rem; /* Larger font size */
+    height: 64px; /* Taller input */
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--text-primary);
+    background: #FFFFFF;
+    border: 3px solid #000000; /* Thicker border */
+    border-radius: 8px;
+    box-shadow: 4px 4px 0px #000000;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#heroSearchInput {
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.search-input-wrapper input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    transform: translate(-4px, -4px);
+    box-shadow: 8px 8px 0px var(--primary-color); /* "Loud" colored shadow */
+    background-color: #FFFFFF;
+}
+
+.search-input-wrapper input::placeholder {
+    color: var(--text-tertiary);
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.search-input-wrapper input:focus + .search-icon,
+.search-input-wrapper input:not(:placeholder-shown) + .search-icon {
+    color: var(--primary-color);
+}
+
+/* Search Results Dropdown */
+.search-results-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    right: 0;
+    background: #FFFFFF;
+    border: 2px solid #000000;
+    border-radius: 8px;
+    box-shadow: 6px 6px 0px #000000;
+    max-height: 400px;
+    overflow-y: auto;
+    display: none; /* Hidden by default */
+    z-index: 1000;
+    padding: 0.5rem 0;
+    text-align: left; /* Ensure left alignment inside hero section */
+}
+
+.search-results-dropdown.show {
+    display: block;
+    animation: fadeInDown 0.2s ease;
+}
+
+.search-result-category {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: 'Space Grotesk', sans-serif;
+    border-bottom: 1px solid var(--separator-translucent);
+    margin-top: 0.5rem;
+}
+
+.search-result-category:first-child {
+    margin-top: 0;
+}
+
+.search-result-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid var(--separator-translucent);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background-color: var(--fill-tertiary);
+}
+
+.search-result-item.highlighted {
+    background-color: var(--fill-tertiary);
+    border-left: 4px solid var(--primary-color);
+    padding-left: calc(1rem - 4px);
+}
+
+.search-result-icon {
+    width: 40px;
+    height: 40px;
+    background: #000000;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    border: 2px solid #000000;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.search-result-item:hover .search-result-icon {
+    background: var(--secondary-color);
+    color: #FFFFFF;
+    border-color: #000000;
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px #000000;
+}
+
+.search-result-content {
+    flex: 1;
+}
+
+.search-result-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    margin-bottom: 0.125rem;
+}
+
+.search-result-subtitle {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.no-results {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+@media (max-width: 600px) {
+    .hero-search-container {
+        margin-top: 1.5rem;
+        padding: 0 1rem;
+    }
+    
+    .search-input-wrapper input {
+        padding: 0.875rem 0.875rem 0.875rem 3rem;
+        font-size: 1rem;
+        height: 56px; /* Slightly smaller on mobile */
+    }
+    
+    .search-icon {
+        left: 2rem; /* Adjusted for container padding */
+    }
+}
+

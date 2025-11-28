@@ -46,16 +46,15 @@ function getUserFavorites(userId) {
 
 // Launch a favorite
 function launchFavorite(favorite) {
-    if (favorite.prefill) {
-        if (favorite.prefill.department) {
-            sessionStorage.setItem('prefilledDepartment', favorite.prefill.department);
-        }
-        if (favorite.prefill.type) {
-            sessionStorage.setItem('prefilledRequestType', favorite.prefill.type);
-        }
-        if (favorite.prefill.title) {
-            sessionStorage.setItem('prefilledTitle', favorite.prefill.title);
-        }
+    const prefill = favorite?.prefill || {};
+    if (prefill.department) {
+        sessionStorage.setItem('prefilledDepartment', prefill.department);
+    }
+    if (prefill.type) {
+        sessionStorage.setItem('prefilledRequestType', prefill.type);
+    }
+    if (prefill.title) {
+        sessionStorage.setItem('prefilledTitle', prefill.title);
     }
     window.location.href = 'lops-general-intake.html';
 }
@@ -237,7 +236,11 @@ function initializeRoleSwitcher() {
         const selectedUser = users.find(u => u.id === userId);
         if (selectedUser) {
             setCurrentUser(selectedUser);
-            // Scroll to top before reload
+            // Disable browser's automatic scroll restoration
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+            // Scroll to top before navigation
             window.scrollTo(0, 0);
             // If on admin dashboard and switching to non-admin, redirect to home
             if (window.location.pathname.includes('admin-dashboard.html') && selectedUser.role !== 'admin') {

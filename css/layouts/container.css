@@ -1,0 +1,22 @@
+/* Core page container spacing */
+.container {
+    max-width: 1400px;
+    margin: 2.5rem auto;
+    padding: 0 3rem;
+    position: relative;
+    z-index: 10;
+}
+
+@media (max-width: 1024px) {
+    .container {
+        padding: 0 2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 0 1.5rem;
+        margin: 2rem auto;
+    }
+}
+
