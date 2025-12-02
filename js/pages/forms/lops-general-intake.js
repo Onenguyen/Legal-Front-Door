@@ -3,6 +3,7 @@ import { initializeDefaultUser, createRequest } from '../../core/state.js';
 import { onReady, toTitleCase } from '../../utils/dom.js';
 import { ROUTES } from '../../core/constants.js';
 import { createPeoplePicker } from '../../components/people-picker.js';
+import { initCustomSelects } from '../../components/custom-select.js';
 
 // ============================================
 // Constants
@@ -869,7 +870,8 @@ function getRequiredFields() {
     const fields = ['helpType'];
     
     if (helpType === 'signature') {
-        fields.push('fileToSign', 'signatureType', 'signatureNotes');
+        // Fields in form order: file upload, signature type, translation, signers/wetInk options, then reason
+        fields.push('fileToSign', 'signatureType');
         
         // Add translation language if Needs Translation is checked
         const needsTranslationCheckbox = document.getElementById('needsTranslation');
@@ -884,15 +886,14 @@ function getRequiredFields() {
         } else if (signatureType === 'wetInk') {
             const wetInkOptions = getCheckboxValues('wetInkOptions');
             
-            // Scanned copy is always required when Wet Ink is selected
-            fields.push('scannedCopy');
-            
             // Check if mailing is needed from "Mail original versions" checkbox
             const needsMailingFromCheckbox = wetInkOptions.includes('mailOriginals');
             
             if (wetInkOptions.includes('notarize')) {
-                fields.push('notarizationLocation', 'wetInkCopies', 'wetInkOriginals');
+                // Notarization location first
+                fields.push('notarizationLocation');
                 
+                // State or Country based on location selection
                 const location = getRadioValue('notarizationLocation');
                 if (location === 'unitedStates') {
                     fields.push('notarizationState');
@@ -906,12 +907,18 @@ function getRequiredFields() {
                     fields.push('apostilleCountry');
                 }
                 
+                // Number of copies and wet ink handling
+                fields.push('wetInkCopies', 'wetInkOriginals');
+                
                 // Add mailing fields when "Mail originals" radio is selected under wet ink originals handling
                 const wetInkOriginals = getRadioValue('wetInkOriginals');
                 if (wetInkOriginals === 'mailOriginals') {
                     fields.push('mailingRecipient', 'mailingAddress', 'mailingCity', 'mailingStateProvince', 'mailingPostalCode', 'mailingCountry');
                 }
             }
+            
+            // Scanned copy is always required when Wet Ink is selected (appears after notarization section)
+            fields.push('scannedCopy');
             
             // Also add mailing fields when "Mail original versions" checkbox is checked
             if (needsMailingFromCheckbox) {
@@ -921,6 +928,18 @@ function getRequiredFields() {
                 }
             }
         }
+        
+        // Has this request already been approved? (appears after mailing section)
+        fields.push('alreadyApproved');
+        
+        // Add approval documentation if already approved is Yes
+        const alreadyApproved = getRadioValue('alreadyApproved');
+        if (alreadyApproved === 'yes') {
+            fields.push('approvalDoc');
+        }
+        
+        // Reason for Request appears last in the signature section
+        fields.push('signatureNotes');
     } else if (helpType === 'contractPull') {
         fields.push('salesContract', 'originatingEntity', 'companyNames', 'agreementName', 'contractPullDescription');
     } else if (helpType === 'other') {
@@ -986,6 +1005,11 @@ function checkFieldCompletion(fieldName) {
         case 'apostilleCountry':
             const apostilleCountry = document.getElementById('apostilleCountry');
             return apostilleCountry && apostilleCountry.value.trim();
+        case 'alreadyApproved':
+            return !!getRadioValue('alreadyApproved');
+        case 'approvalDoc':
+            const approvalDocInput = document.getElementById('approvalDoc');
+            return approvalDocInput && approvalDocInput.files.length > 0;
         case 'salesContract':
             return !!getRadioValue('salesContract');
         case 'originatingEntity':
@@ -1053,6 +1077,7 @@ function updateSummaryRequiredFields(requiredFields, completedFields) {
         'helpType': 'Select help type',
         'fileToSign': 'Upload file to sign',
         'signatureType': 'Select signature type',
+        'signatureNotes': 'Reason for request',
         'translationLanguage': 'Select translation language',
         'signers': 'Add signers',
         'wetInkOptions': 'Select Wet Ink options',
@@ -1069,10 +1094,13 @@ function updateSummaryRequiredFields(requiredFields, completedFields) {
         'mailingStateProvince': 'State/Province',
         'mailingPostalCode': 'Postal code',
         'mailingCountry': 'Mailing country',
+        'alreadyApproved': 'Approval status',
+        'approvalDoc': 'Upload approval documentation',
         'salesContract': 'Sales contract status',
         'originatingEntity': 'Originating entity',
+        'companyNames': 'Counterparty name(s)',
         'agreementName': 'Agreement type',
-        'contractPullDescription': 'Reason for Request',
+        'contractPullDescription': 'Reason for request',
         'otherDescription': 'Description'
     };
     
@@ -2408,6 +2436,9 @@ onReady(() => {
     
     // Initialize E-Signature signer form
     initSignerForm();
+    
+    // Initialize custom styled selects
+    initCustomSelects();
     
     // Initialize summary panel toggle elements
     summaryPanelToggle = document.getElementById('summaryPanelToggle');

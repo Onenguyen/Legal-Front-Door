@@ -298,7 +298,19 @@
                                     <!-- Country Field (Conditional - shown when Outside of US is selected) -->
                                     <div id="countryField" class="form-group conditional-section" style="display: none; flex: 0 0 auto;">
                                         <label for="notarizationCountry">Country <span class="required-indicator">*</span></label>
-                                        <input type="text" id="notarizationCountry" class="form-control" placeholder="Enter country name">
+                                        <select id="notarizationCountry" class="form-control">
+                                            <option value="">Select a country</option>
+                                            <option value="Brazil">Brazil</option>
+                                            <option value="Canada">Canada</option>
+                                            <option value="Costa Rica">Costa Rica</option>
+                                            <option value="France">France</option>
+                                            <option value="India">India</option>
+                                            <option value="Ireland">Ireland</option>
+                                            <option value="Japan">Japan</option>
+                                            <option value="Singapore">Singapore</option>
+                                            <option value="South Korea">South Korea</option>
+                                            <option value="United Kingdom">United Kingdom</option>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -323,7 +335,19 @@
                                     <!-- Apostille Country Field (Conditional - shown when Yes is selected) -->
                                     <div id="apostilleCountryField" class="form-group conditional-section" style="display: none; flex: 0 0 auto;">
                                         <label for="apostilleCountry">Which country? <span class="required-indicator">*</span></label>
-                                        <input type="text" id="apostilleCountry" class="form-control" placeholder="Enter country name">
+                                        <select id="apostilleCountry" class="form-control">
+                                            <option value="">Select a country</option>
+                                            <option value="Brazil">Brazil</option>
+                                            <option value="Canada">Canada</option>
+                                            <option value="Costa Rica">Costa Rica</option>
+                                            <option value="France">France</option>
+                                            <option value="India">India</option>
+                                            <option value="Ireland">Ireland</option>
+                                            <option value="Japan">Japan</option>
+                                            <option value="Singapore">Singapore</option>
+                                            <option value="South Korea">South Korea</option>
+                                            <option value="United Kingdom">United Kingdom</option>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -421,7 +445,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group form-group-separated">
                         <label>Has this request already been approved? <span class="required-indicator">*</span></label>
                         <div class="radio-group radio-group-horizontal">
                             <label class="radio-option">

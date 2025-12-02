@@ -184,3 +184,97 @@ export const INTAKE_FORMS = [
     }
 ];
 
+// Department Taxonomy - Hierarchical navigation structure
+// Level 1: Department, Level 2: Categories, Level 3: Items with launch URLs
+export const DEPARTMENT_TAXONOMY = {
+    [DEPARTMENTS.BUSINESS_DEVELOPMENT]: {
+        categories: [
+            {
+                name: 'Patents, Trademark & Copyrights',
+                items: [
+                    { label: 'Patent Program', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__app?u=/site/a14al000006zzUXAAY/page/a12al0000034PULAA2' },
+                    { label: 'Invention Disclosure Form (IDF)', url: 'https://cohesity.anaqua.com/anaqua/Portal/GadgetView.aspx?PortalPageId=482' },
+                    { label: 'View my Patents and IDFs', url: 'https://cohesity.anaqua.com/anaqua/Portal/GadgetView.aspx?PortalPageId=482' },
+                    { label: 'Patent Awards', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__app?u=/site/a14al000006zzUXAAY/page/a12al0000035FxZAAU' },
+                    { label: 'Patent Training', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__app?u=/site/a14al000006zzUXAAY/page/a12al0000034PULAA2' },
+                    { label: 'I want a list of Cohesity Trademarks', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__app?u=/site/a14al000006zzUXAAY/page/a12al000003oDd4AAE' },
+                    { label: 'Request a new product name or tagline', url: 'https://app.smartsheet.com/b/form/bf356c16d1bd4317aebde9da837e4967' },
+                    { label: 'Rules for using Cohesity Trademarks', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__FileDetail?fileId=069al00000KIvdqAAD' },
+                    { label: 'Add IP notices to Cohesity materials & code', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__FileDetail?fileId=069al000009XZt3AAG' }
+                ]
+            },
+            {
+                name: 'Product & Open Source',
+                items: [
+                    { label: 'Submit a Product Readiness Questionnaire (PRQ)', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__FileDetail?fileId=069al00000AbqEnAAJ&siteId=a14al000006zzUXAAY' },
+                    { label: 'Question about Pathways or Partner Program', url: 'https://form.asana.com/?k=8Mv3_fSedHoK4l_AIoNBOA&d=8683820862512' },
+                    { label: 'Open Source Software CodeScan', url: 'https://app.smartsheet.com/b/form/bf356c16d1bd4317aebde9da837e4967' },
+                    { label: 'I want to release Cohesity code', url: 'https://app.smartsheet.com/b/form/bf356c16d1bd4317aebde9da837e4967' },
+                    { label: 'I want to use Third Party Technology (TPT)', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__FileDetail?fileId=069al000009XZhlAAG' },
+                    { label: 'Third Party Technology (TPT) Policy', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__FileDetail?fileId=069al000009XZhlAAG' },
+                    { label: 'Contracting & Letters for Partners', url: 'https://cohesity.lightning.force.com/lightning/page/home' },
+                    { label: 'Tech Partnership (ITLA)', url: 'https://cohesity.lightning.force.com/lightning/page/home' },
+                    { label: 'Cohesity Technology Partner Program (CTPP)', url: '' },
+                    { label: 'Alliances & Marketplace', url: 'https://form.asana.com/?k=E3PlvCwriD-UJXunOe4s7w&d=8683820862512' },
+                    { label: 'Other Contract Requests', url: 'https://cohesity.lightning.force.com/lightning/page/home' }
+                ]
+            },
+            {
+                name: 'Content & Information Reviews',
+                items: [
+                    { label: 'Content for Customers & Prospects', url: 'https://www.secretlabs.com' },
+                    { label: 'Content for Channel & Ecosystem', url: 'https://form.asana.com/?k=8Mv3_fSedHoK4l_AIoNBOA&d=8683820862512' },
+                    { label: 'Content for widespread public consumption', url: 'https://form.asana.com/?k=4EeG9mSrOckv9xK-QVUk4A&d=8683820862512' }
+                ]
+            },
+            {
+                name: 'NDA Workflow (All Things NDA)',
+                items: [
+                    { label: 'Mutual NDA request', url: 'https://cohesity.lightning.force.com/lightning/page/home' },
+                    { label: 'Vendor NDA request', url: 'https://www.secretlabs.com' },
+                    { label: 'NDA Questions', url: 'https://www.secretlabs.com' }
+                ]
+            },
+            {
+                name: 'AI & Privacy Questions',
+                items: [
+                    { label: 'AI Tools, Usage & Questions', url: 'https://form.asana.com/?k=b3u6JNSZk7w8rQI2Y5HCuQ&d=8683820862512' },
+                    { label: 'Pre-approved list of Gen-AI tools', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__FileDetail?fileId=069al000009s66XAAQ' },
+                    { label: 'Privacy Matters & Questions', url: 'https://form.asana.com/?k=b3u6JNSZk7w8rQI2Y5HCuQ&d=8683820862512' }
+                ]
+            },
+            {
+                name: 'Compliance & Ethics',
+                items: [
+                    { label: 'Create or Update a Policy', url: 'https://form.asana.com/?k=bUQpAz_Y-8M6YG-uh0BhWg&d=8683820862512' },
+                    { label: 'Find a Policy', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__app?u=/site/a14al000006zFjUAAU/page/a12al000002exJZAAY' },
+                    { label: 'Gifts, Entertainment, Meals, and Business Courtesies', url: 'https://veracity--simpplr.vf.force.com/apex/FileDetail?siteId=a14al000006zFjUAAU&fileId=069al000009XWDfAAO' },
+                    { label: 'Charitable Events & Donations', url: 'https://forms.office.com/Pages/ResponsePage.aspx?id=LMHFs5VFrEabgObXuIaQP8zIGOWdGfxIpNgZs13IFr1UOVVDWFlLMTRJRlo5Mlc2MkJGSTdaVFE5SC4u' },
+                    { label: 'Conflicts of Interest', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__app?u=/site/a14al000006zzUXAAY/page/a12al0000034MjNAAU' },
+                    { label: 'Ethics Helpline', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__app?u=/site/a14al000006zFjUAAU/page/a12al000002excvAAA' },
+                    { label: 'Trade Compliance', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__app?u=/site/a14al00000EIPkfAAH/page/a12al000003FIMHAA4' }
+                ]
+            },
+            {
+                name: 'I Need to Buy Something',
+                items: [
+                    { label: 'Vendor NDA request', url: 'https://www.secretlabs.com' },
+                    { label: 'I need to buy something', url: 'https://cohesity.coupahost.com/user/home' }
+                ]
+            },
+            {
+                name: 'Employee Specific Assistance',
+                items: [
+                    { label: 'Stock/E-Trade Related Questions', url: 'https://www.secretlabs.com' },
+                    { label: 'Find a Policy', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__app?u=/site/a14al000006zFjUAAU/page/a12al000002exJZAAY' },
+                    { label: 'Employment Related Issue', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__app?u=/site/a14al000006zS6rAAE/page/a12al0000021dxRAAQ' },
+                    { label: 'Gifts, Entertainment, Meals, and Business Courtesies', url: 'https://veracity--simpplr.vf.force.com/apex/FileDetail?siteId=a14al000006zFjUAAU&fileId=069al000009XWDfAAO' },
+                    { label: 'Charitable Events & Donations', url: 'https://forms.office.com/Pages/ResponsePage.aspx?id=LMHFs5VFrEabgObXuIaQP8zIGOWdGfxIpNgZs13IFr1UOVVDWFlLMTRJRlo5Mlc2MkJGSTdaVFE5SC4u' },
+                    { label: 'Conflicts of Interest', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__app?u=/site/a14al000006zzUXAAY/page/a12al0000034MjNAAU' },
+                    { label: 'Ethics Helpline', url: 'https://veracity--simpplr.vf.force.com/apex/simpplr__app?u=/site/a14al000006zFjUAAU/page/a12al000002excvAAA' }
+                ]
+            }
+        ]
+    }
+};
+

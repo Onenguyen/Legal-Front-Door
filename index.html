@@ -38,7 +38,7 @@
                         <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2.5" fill="none"/>
                         <path d="M17 17L22 22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <input type="text" id="heroSearchInput" placeholder="Search for forms..." autocomplete="off">
+                    <input type="text" id="heroSearchInput" placeholder="How can I help you today?" autocomplete="off">
                 </div>
                 <div id="searchResults" class="search-results-dropdown"></div>
             </div>
@@ -211,6 +211,13 @@
     </div>
     <!-- End Container -->
 
+    <!-- Department Modal -->
+    <div id="departmentModal" class="modal department-modal" role="dialog" aria-modal="true" aria-labelledby="departmentModalTitle">
+        <div class="modal-content department-modal-content">
+            <!-- Dynamically populated by JavaScript -->
+        </div>
+    </div>
+
     <script src="js/mock-data.js"></script>
     <script src="js/app.js"></script>
     <script type="module" src="js/multi-select.js"></script>
@@ -218,7 +225,7 @@
         import { autoInitNavbar } from './js/components/navbar.js';
         autoInitNavbar();
     </script>
-    <script type="module" src="js/pages/home.js?v=3"></script>
+    <script type="module" src="js/pages/home.js?v=4"></script>
 </body>
 </html>
 

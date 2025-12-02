@@ -198,7 +198,9 @@ input[type="file"]::file-selector-button:hover {
 }
 
 /* Form Validation Styles */
-.form-control:invalid:not(:focus):not(:placeholder-shown) {
+/* Only apply invalid styling to text inputs that have user input, not selects */
+input.form-control:invalid:not(:focus):not(:placeholder-shown),
+textarea.form-control:invalid:not(:focus):not(:placeholder-shown) {
     border-color: var(--priority-urgent);
 }
 
