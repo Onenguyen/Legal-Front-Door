@@ -160,7 +160,7 @@ export function initChatbot() {
     const quickActionSets = {
         primary: [
             { label: 'Help with a Request', message: 'I need help with a request', nextSet: 'departments' },
-            { label: 'Learning', message: 'I need learning resources' },
+            { label: 'Learning', message: null, action: 'navigateToLearning' },
             { label: 'Feedback', message: "I'd like to leave feedback" },
             { label: 'Question', message: 'I have a question' }
         ],
@@ -195,6 +195,17 @@ export function initChatbot() {
             if (action.silent) {
                 button.dataset.silent = 'true';
             }
+            if (action.action) {
+                button.dataset.action = action.action;
+            }
+            // Direct click handler for Learning navigation
+            if (action.action === 'navigateToLearning') {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.href = 'learning.html';
+                });
+            }
             quickActionsContainer.appendChild(button);
         });
 
@@ -215,6 +226,13 @@ export function initChatbot() {
             const message = button.dataset.message;
             const nextSet = button.dataset.nextSet;
             const silent = button.dataset.silent === 'true';
+            const action = button.dataset.action;
+
+            // Handle special actions
+            if (action === 'navigateToLearning') {
+                window.location.href = 'learning.html';
+                return;
+            }
 
             if (message && !silent) {
                 sendQuickMessage(message);

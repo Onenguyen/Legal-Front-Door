@@ -194,6 +194,376 @@ function displayFileList(fileInput, listId) {
 }
 
 // ============================================
+// E-Signature Signers Management
+// ============================================
+
+/**
+ * Generate a unique ID for a signer
+ */
+function generateSignerId() {
+    return 'signer_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+/**
+ * Add a new signer to the list
+ * @param {string} name - Signer's full name
+ * @param {string} title - Signer's title (optional)
+ * @param {string} email - Signer's email address
+ */
+function addSigner(name, title, email) {
+    if (!name.trim() || !email.trim()) {
+        return false;
+    }
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+        return false;
+    }
+    
+    const signer = {
+        id: generateSignerId(),
+        name: name.trim(),
+        title: title ? title.trim() : '',
+        email: email.trim(),
+        order: signers.length + 1
+    };
+    
+    signers.push(signer);
+    renderSigners();
+    updateProgress();
+    scheduleAutoSave();
+    
+    // Hide error if visible
+    const errorEl = document.getElementById('signersError');
+    if (errorEl) errorEl.style.display = 'none';
+    
+    return true;
+}
+
+/**
+ * Remove a signer from the list
+ * @param {string} signerId - The signer's unique ID
+ */
+function removeSigner(signerId) {
+    signers = signers.filter(s => s.id !== signerId);
+    // Re-assign order numbers
+    signers.forEach((s, index) => {
+        s.order = index + 1;
+    });
+    renderSigners();
+    updateProgress();
+    scheduleAutoSave();
+}
+
+/**
+ * Move a signer to a new position (for drag & drop)
+ * @param {number} fromIndex - Original position
+ * @param {number} toIndex - New position
+ */
+function moveSigner(fromIndex, toIndex) {
+    if (fromIndex === toIndex) return;
+    
+    const [removed] = signers.splice(fromIndex, 1);
+    signers.splice(toIndex, 0, removed);
+    
+    // Re-assign order numbers
+    signers.forEach((s, index) => {
+        s.order = index + 1;
+    });
+    
+    renderSigners();
+    scheduleAutoSave();
+}
+
+/**
+ * Update the signer count text and form UI
+ */
+function updateSignerFormUI() {
+    const signerCountText = document.getElementById('signerCountText');
+    const btnText = document.getElementById('addSignerBtnText');
+    const signersList = document.getElementById('signersList');
+    const addBtn = document.getElementById('addSignerBtn');
+    
+    const hasSigners = signers.length > 0;
+    
+    // Show signers list only when there are signers
+    if (signersList) {
+        signersList.style.display = hasSigners ? 'flex' : 'none';
+    }
+    
+    // Update signer count hint
+    if (signerCountText) {
+        if (signers.length === 0) {
+            signerCountText.textContent = 'No signers yet';
+        } else if (signers.length === 1) {
+            signerCountText.textContent = '1 signer added';
+        } else {
+            signerCountText.textContent = `${signers.length} signers added`;
+        }
+    }
+    
+    // Update button text - hide text span when we have signers (just show the + icon)
+    if (btnText) {
+        btnText.textContent = hasSigners ? '' : 'Add';
+    }
+}
+
+/**
+ * Render the signers list in the DOM
+ */
+function renderSigners() {
+    const container = document.getElementById('signersList');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    signers.forEach((signer, index) => {
+        const card = document.createElement('div');
+        card.className = 'signer-card';
+        card.draggable = true;
+        card.dataset.signerId = signer.id;
+        card.dataset.index = index;
+        
+        card.innerHTML = `
+            <div class="signer-drag-handle" title="Drag to reorder">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                    <circle cx="9" cy="5" r="2"></circle>
+                    <circle cx="9" cy="12" r="2"></circle>
+                    <circle cx="9" cy="19" r="2"></circle>
+                    <circle cx="15" cy="5" r="2"></circle>
+                    <circle cx="15" cy="12" r="2"></circle>
+                    <circle cx="15" cy="19" r="2"></circle>
+                </svg>
+            </div>
+            <div class="signer-order">${signer.order}</div>
+            <div class="signer-info">
+                <div class="signer-name">${escapeHtml(signer.name)}</div>
+                ${signer.title ? `<div class="signer-title">${escapeHtml(signer.title)}</div>` : ''}
+                <div class="signer-email">${escapeHtml(signer.email)}</div>
+            </div>
+            <button type="button" class="signer-remove" title="Remove signer" data-signer-id="${signer.id}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        `;
+        
+        // Add drag event listeners
+        card.addEventListener('dragstart', handleDragStart);
+        card.addEventListener('dragend', handleDragEnd);
+        card.addEventListener('dragover', handleDragOver);
+        card.addEventListener('dragenter', handleDragEnter);
+        card.addEventListener('dragleave', handleDragLeave);
+        card.addEventListener('drop', handleDrop);
+        
+        // Add remove button listener
+        const removeBtn = card.querySelector('.signer-remove');
+        removeBtn.addEventListener('click', () => {
+            removeSigner(signer.id);
+        });
+        
+        container.appendChild(card);
+    });
+    
+    // Update UI elements based on signer count
+    updateSignerFormUI();
+}
+
+/**
+ * Escape HTML to prevent XSS
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Drag and drop state
+let draggedElement = null;
+let draggedIndex = null;
+
+function handleDragStart(e) {
+    draggedElement = this;
+    draggedIndex = parseInt(this.dataset.index);
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', this.dataset.index);
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.signer-card').forEach(card => {
+        card.classList.remove('drag-over');
+    });
+    draggedElement = null;
+    draggedIndex = null;
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+}
+
+function handleDragEnter(e) {
+    e.preventDefault();
+    if (this !== draggedElement) {
+        this.classList.add('drag-over');
+    }
+}
+
+function handleDragLeave(e) {
+    this.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    this.classList.remove('drag-over');
+    
+    if (draggedElement === this) return;
+    
+    const toIndex = parseInt(this.dataset.index);
+    
+    if (draggedIndex !== null && !isNaN(toIndex)) {
+        moveSigner(draggedIndex, toIndex);
+    }
+}
+
+/**
+ * Initialize signer form event listeners
+ */
+function initSignerForm() {
+    const addBtn = document.getElementById('addSignerBtn');
+    const nameInput = document.getElementById('newSignerName');
+    const titleInput = document.getElementById('newSignerTitle');
+    const emailInput = document.getElementById('newSignerEmail');
+    
+    if (!addBtn || !nameInput || !emailInput) return;
+    
+    // Initialize the UI state
+    updateSignerFormUI();
+    
+    addBtn.addEventListener('click', () => {
+        const name = nameInput.value;
+        const title = titleInput ? titleInput.value : '';
+        const email = emailInput.value;
+        
+        if (!name.trim()) {
+            nameInput.focus();
+            nameInput.classList.add('has-error');
+            shakeElement(nameInput);
+            return;
+        }
+        
+        if (!email.trim()) {
+            emailInput.focus();
+            emailInput.classList.add('has-error');
+            shakeElement(emailInput);
+            return;
+        }
+        
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) {
+            emailInput.focus();
+            emailInput.classList.add('has-error');
+            shakeElement(emailInput);
+            return;
+        }
+        
+        if (addSigner(name, title, email)) {
+            // Clear the inputs on success
+            nameInput.value = '';
+            if (titleInput) titleInput.value = '';
+            emailInput.value = '';
+            nameInput.classList.remove('has-error');
+            emailInput.classList.remove('has-error');
+            nameInput.focus();
+            
+            // Show success feedback
+            showSignerAddedFeedback();
+        }
+    });
+    
+    // Remove error class on input
+    nameInput.addEventListener('input', () => {
+        nameInput.classList.remove('has-error');
+    });
+    
+    if (titleInput) {
+        titleInput.addEventListener('input', () => {
+            titleInput.classList.remove('has-error');
+        });
+    }
+    
+    emailInput.addEventListener('input', () => {
+        emailInput.classList.remove('has-error');
+    });
+    
+    // Allow pressing Enter to move to next field or add signer
+    nameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (titleInput) {
+                titleInput.focus();
+            } else {
+                emailInput.focus();
+            }
+        }
+    });
+    
+    if (titleInput) {
+        titleInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                emailInput.focus();
+            }
+        });
+    }
+    
+    emailInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addBtn.click();
+        }
+    });
+}
+
+/**
+ * Shake an element to indicate an error
+ */
+function shakeElement(element) {
+    if (!element) return;
+    element.classList.add('shake');
+    setTimeout(() => {
+        element.classList.remove('shake');
+    }, 500);
+}
+
+/**
+ * Show brief feedback when a signer is added
+ */
+function showSignerAddedFeedback() {
+    const btn = document.getElementById('addSignerBtn');
+    if (!btn) return;
+    
+    const originalText = btn.querySelector('#addSignerBtnText');
+    if (originalText) {
+        originalText.textContent = '✓';
+        btn.classList.add('btn-success-flash');
+        
+        setTimeout(() => {
+            btn.classList.remove('btn-success-flash');
+            // Text will be updated by updateSignerFormUI
+            updateSignerFormUI();
+        }, 600);
+    }
+}
+
+// ============================================
 // Prefill Helpers
 // ============================================
 
@@ -277,16 +647,22 @@ let signatureSection;
 let contractPullSection;
 let otherSection;
 let wetInkSection;
+let eSignatureSection;
 let notarizationSection;
 let stateField;
 let countryField;
 let apostilleCountryField;
 let mailingAddressSection;
+let approvalDocSection;
+let translationLanguageSection;
 let autoSaveTimer;
 let submittingForOtherPicker;
 let prefillBanner;
 let prefillBannerDetails;
 let prefillBannerAction;
+
+// E-Signature signers state
+let signers = [];
 
 // Summary panel elements
 let summaryPanelToggle;
@@ -357,6 +733,9 @@ function updateSidebarDots() {
         'helpType': { label: 'Help Type', element: 'input[name="helpType"]' },
         'fileToSign': { label: 'File to Sign', element: '#fileToSign' },
         'signatureType': { label: 'Signature Type', element: 'input[name="signatureType"]' },
+        'translationLanguage': { label: 'Translation Language', element: '#translationLanguage' },
+        'signatureNotes': { label: 'Reason for Request', element: '#signatureNotes' },
+        'signers': { label: 'Signers', element: '#signersList' },
         'wetInkOptions': { label: 'Wet Ink Options', element: 'input[name="wetInkOptions"]' },
         'scannedCopy': { label: 'Scanned Copy', element: 'input[name="scannedCopy"]' },
         'wetInkOriginals': { label: 'Wet Ink Originals', element: 'input[name="wetInkOriginals"]' },
@@ -373,8 +752,8 @@ function updateSidebarDots() {
         'mailingCountry': { label: 'Mailing Country', element: '#mailingCountry' },
         'salesContract': { label: 'Sales Contract', element: 'input[name="salesContract"]' },
         'originatingEntity': { label: 'Originating Entity', element: 'input[name="originatingEntity"]' },
-        'agreementName': { label: 'Agreement Name', element: '#agreementName' },
-        'contractPullDescription': { label: 'Description', element: '#contractPullDescription' },
+        'agreementName': { label: 'Agreement Type', element: '#agreementName' },
+        'contractPullDescription': { label: 'Reason for Request', element: '#contractPullDescription' },
         'otherDescription': { label: 'Description', element: '#otherDescription' }
     };
     
@@ -490,19 +869,29 @@ function getRequiredFields() {
     const fields = ['helpType'];
     
     if (helpType === 'signature') {
-        fields.push('fileToSign', 'signatureType');
+        fields.push('fileToSign', 'signatureType', 'signatureNotes');
+        
+        // Add translation language if Needs Translation is checked
+        const needsTranslationCheckbox = document.getElementById('needsTranslation');
+        if (needsTranslationCheckbox && needsTranslationCheckbox.checked) {
+            fields.push('translationLanguage');
+        }
+        
         const signatureType = getRadioValue('signatureType');
         
-        if (signatureType === 'wetInk') {
-            fields.push('wetInkOptions');
-            
+        if (signatureType === 'eSignature') {
+            fields.push('signers');
+        } else if (signatureType === 'wetInk') {
             const wetInkOptions = getCheckboxValues('wetInkOptions');
+            
+            // Scanned copy is always required when Wet Ink is selected
+            fields.push('scannedCopy');
             
             // Check if mailing is needed from "Mail original versions" checkbox
             const needsMailingFromCheckbox = wetInkOptions.includes('mailOriginals');
             
             if (wetInkOptions.includes('notarize')) {
-                fields.push('notarizationLocation', 'wetInkCopies', 'scannedCopy', 'wetInkOriginals');
+                fields.push('notarizationLocation', 'wetInkCopies', 'wetInkOriginals');
                 
                 const location = getRadioValue('notarizationLocation');
                 if (location === 'unitedStates') {
@@ -533,7 +922,7 @@ function getRequiredFields() {
             }
         }
     } else if (helpType === 'contractPull') {
-        fields.push('salesContract', 'originatingEntity', 'agreementName', 'contractPullDescription');
+        fields.push('salesContract', 'originatingEntity', 'companyNames', 'agreementName', 'contractPullDescription');
     } else if (helpType === 'other') {
         fields.push('otherDescription');
     }
@@ -550,8 +939,17 @@ function checkFieldCompletion(fieldName) {
             return fileInput && fileInput.files.length > 0;
         case 'signatureType':
             return !!getRadioValue('signatureType');
+        case 'signatureNotes':
+            const signatureNotes = document.getElementById('signatureNotes');
+            return signatureNotes && signatureNotes.value.trim();
+        case 'translationLanguage':
+            const translationLanguage = document.getElementById('translationLanguage');
+            return translationLanguage && translationLanguage.value.trim();
+        case 'signers':
+            return signers.length > 0;
         case 'wetInkOptions':
-            return getCheckboxValues('wetInkOptions').length > 0;
+            // No longer required - always return true
+            return true;
         case 'scannedCopy':
             return !!getRadioValue('scannedCopy');
         case 'wetInkOriginals':
@@ -592,6 +990,9 @@ function checkFieldCompletion(fieldName) {
             return !!getRadioValue('salesContract');
         case 'originatingEntity':
             return !!getRadioValue('originatingEntity');
+        case 'companyNames':
+            const companyNames = document.getElementById('companyNames');
+            return companyNames && companyNames.value.trim();
         case 'agreementName':
             const agreement = document.getElementById('agreementName');
             return agreement && agreement.value.trim();
@@ -652,6 +1053,8 @@ function updateSummaryRequiredFields(requiredFields, completedFields) {
         'helpType': 'Select help type',
         'fileToSign': 'Upload file to sign',
         'signatureType': 'Select signature type',
+        'translationLanguage': 'Select translation language',
+        'signers': 'Add signers',
         'wetInkOptions': 'Select Wet Ink options',
         'scannedCopy': 'Scanned copy preference',
         'wetInkOriginals': 'Wet Ink handling',
@@ -668,8 +1071,8 @@ function updateSummaryRequiredFields(requiredFields, completedFields) {
         'mailingCountry': 'Mailing country',
         'salesContract': 'Sales contract status',
         'originatingEntity': 'Originating entity',
-        'agreementName': 'Agreement name',
-        'contractPullDescription': 'Description',
+        'agreementName': 'Agreement type',
+        'contractPullDescription': 'Reason for Request',
         'otherDescription': 'Description'
     };
     
@@ -751,7 +1154,10 @@ function saveFormData() {
         // Signature fields
         signatureType: getRadioValue('signatureType'),
         needsTranslation: document.getElementById('needsTranslation')?.checked || false,
+        translationLanguage: document.getElementById('translationLanguage')?.value || '',
         signatureNotes: document.getElementById('signatureNotes')?.value || '',
+        // E-Signature signers
+        signers: signers,
         wetInkOptions: getCheckboxValues('wetInkOptions'),
         notarialActs: getCheckboxValues('notarialAct'),
         apostille: getRadioValue('apostille'),
@@ -822,13 +1228,27 @@ function loadFormData() {
                     radio.checked = true;
                     handleSignatureTypeChange();
                 }
+                
+                // Restore signers after E-Signature section is shown
+                if (formData.signatureType === 'eSignature' && formData.signers && formData.signers.length > 0) {
+                    signers = formData.signers;
+                    renderSigners();
+                }
             }, 100);
         }
         
         // Restore other fields
         if (formData.needsTranslation) {
             const el = document.getElementById('needsTranslation');
-            if (el) el.checked = true;
+            if (el) {
+                el.checked = true;
+                handleNeedsTranslationChange();
+            }
+            // Restore translation language
+            if (formData.translationLanguage) {
+                const langEl = document.getElementById('translationLanguage');
+                if (langEl) langEl.value = formData.translationLanguage;
+            }
         }
         
         // Add more field restorations as needed...
@@ -960,12 +1380,28 @@ function handleSignatureTypeChange() {
     
     if (signatureType === 'wetInk') {
         showSection(wetInkSection);
+        hideSection(eSignatureSection);
+        // Clear signers when switching away from E-Signature
+        signers = [];
+        renderSigners();
+    } else if (signatureType === 'eSignature') {
+        hideSection(wetInkSection);
+        // Also hide nested wet ink sections
+        hideSection(notarizationSection);
+        hideSection(stateField);
+        hideSection(countryField);
+        // Show E-Signature section
+        showSection(eSignatureSection);
     } else {
         hideSection(wetInkSection);
+        hideSection(eSignatureSection);
         // Also hide nested sections when wet ink is deselected
         hideSection(notarizationSection);
         hideSection(stateField);
         hideSection(countryField);
+        // Clear signers
+        signers = [];
+        renderSigners();
     }
     
     updateProgress();
@@ -1064,6 +1500,45 @@ function handleApostilleChange() {
     scheduleAutoSave();
 }
 
+/**
+ * Handle already approved selection change
+ * Show approval documentation upload when Yes is selected
+ */
+function handleAlreadyApprovedChange() {
+    const alreadyApproved = getRadioValue('alreadyApproved');
+    
+    if (alreadyApproved === 'yes') {
+        showSection(approvalDocSection);
+    } else {
+        hideSection(approvalDocSection);
+    }
+    
+    updateProgress();
+    scheduleAutoSave();
+}
+
+/**
+ * Handle needs translation checkbox change
+ * Show language selection when checked
+ */
+function handleNeedsTranslationChange() {
+    const needsTranslationCheckbox = document.getElementById('needsTranslation');
+    
+    if (needsTranslationCheckbox && needsTranslationCheckbox.checked) {
+        showSection(translationLanguageSection);
+    } else {
+        hideSection(translationLanguageSection);
+        // Clear the language selection when unchecked
+        const languageSelect = document.getElementById('translationLanguage');
+        if (languageSelect) {
+            languageSelect.value = '';
+        }
+    }
+    
+    updateProgress();
+    scheduleAutoSave();
+}
+
 // ============================================
 // Form Validation
 // ============================================
@@ -1110,13 +1585,38 @@ function validateForm() {
             highlightError(document.querySelector('input[name="signatureType"]')?.closest('.form-group'));
         }
         
+        // Validate translation language if Needs Translation is checked
+        const needsTranslationCheckbox = document.getElementById('needsTranslation');
+        if (needsTranslationCheckbox && needsTranslationCheckbox.checked) {
+            const translationLanguage = document.getElementById('translationLanguage');
+            if (!translationLanguage || !translationLanguage.value) {
+                isValid = false;
+                errors.push('Please select a translation language.');
+                highlightError(translationLanguage?.closest('.form-group'));
+            }
+        }
+        
+        // If E-Signature is selected, validate signers
+        if (signatureType === 'eSignature') {
+            if (signers.length === 0) {
+                isValid = false;
+                errors.push('Please add at least one signer.');
+                const signersError = document.getElementById('signersError');
+                if (signersError) signersError.style.display = 'block';
+                highlightError(document.getElementById('signersList')?.closest('.form-group'));
+            }
+        }
+        
         // If Wet Ink is selected, validate wet ink options
         if (signatureType === 'wetInk') {
             const wetInkOptions = getCheckboxValues('wetInkOptions');
-            if (wetInkOptions.length === 0) {
+            
+            // Validate scanned copy (always required when Wet Ink is selected)
+            const scannedCopy = getRadioValue('scannedCopy');
+            if (!scannedCopy) {
                 isValid = false;
-                errors.push('Please select at least one Wet Ink option.');
-                highlightError(document.querySelector('input[name="wetInkOptions"]')?.closest('.form-group'));
+                errors.push('Please select whether you need a scanned copy.');
+                highlightError(document.querySelector('input[name="scannedCopy"]')?.closest('.form-group'));
             }
             
             // If Notarize is checked, validate notarization fields
@@ -1126,7 +1626,7 @@ function validateForm() {
                 const location = getRadioValue('notarizationLocation');
                 if (!location) {
                     isValid = false;
-                    errors.push('Please select where the notarization will take place.');
+                    errors.push('Please select where the notary will take place.');
                     highlightError(document.querySelector('input[name="notarizationLocation"]')?.closest('.form-group'));
                 }
                 
@@ -1166,14 +1666,6 @@ function validateForm() {
                     highlightError(copies?.closest('.form-group'));
                 }
                 
-                // Validate scanned copy (only when notarize is checked)
-                const scannedCopy = getRadioValue('scannedCopy');
-                if (!scannedCopy) {
-                    isValid = false;
-                    errors.push('Please select whether you need a scanned copy.');
-                    highlightError(document.querySelector('input[name="scannedCopy"]')?.closest('.form-group'));
-                }
-                
                 // Validate wet ink originals handling (only when notarize is checked)
                 const wetInkOriginals = getRadioValue('wetInkOriginals');
                 if (!wetInkOriginals) {
@@ -1182,6 +1674,14 @@ function validateForm() {
                     highlightError(document.querySelector('input[name="wetInkOriginals"]')?.closest('.form-group'));
                 }
             }
+        }
+        
+        // Validate reason for request
+        const signatureNotes = document.getElementById('signatureNotes');
+        if (!signatureNotes || !signatureNotes.value.trim()) {
+            isValid = false;
+            errors.push('Please enter the Reason for Request.');
+            highlightError(signatureNotes?.closest('.form-group'));
         }
     } else if (helpType === 'contractPull') {
         // Validate sales contract
@@ -1200,11 +1700,19 @@ function validateForm() {
             highlightError(document.querySelector('input[name="originatingEntity"]')?.closest('.form-group'));
         }
         
+        // Validate company names
+        const companyNames = document.getElementById('companyNames');
+        if (!companyNames || !companyNames.value.trim()) {
+            isValid = false;
+            errors.push('Please enter the Counterparty Name (s).');
+            highlightError(companyNames?.closest('.form-group'));
+        }
+        
         // Validate agreement name
         const agreementName = document.getElementById('agreementName');
         if (!agreementName || !agreementName.value.trim()) {
             isValid = false;
-            errors.push('Please enter the Agreement Name.');
+            errors.push('Please select the Agreement Type.');
             highlightError(agreementName?.closest('.form-group'));
         }
         
@@ -1212,7 +1720,7 @@ function validateForm() {
         const description = document.getElementById('contractPullDescription');
         if (!description || !description.value.trim()) {
             isValid = false;
-            errors.push('Please describe what you need.');
+            errors.push('Please enter the Reason for Request.');
             highlightError(description?.closest('.form-group'));
         }
     } else if (helpType === 'other') {
@@ -1356,11 +1864,11 @@ function validateFormContent(formData) {
         const details = formData.contractPullDetails;
         
         if (details.agreementName && details.agreementName.length > VALIDATION_LIMITS.AGREEMENT_NAME_MAX_LENGTH) {
-            errors.push(`Agreement name must be ${VALIDATION_LIMITS.AGREEMENT_NAME_MAX_LENGTH} characters or less`);
+            errors.push(`Agreement type must be ${VALIDATION_LIMITS.AGREEMENT_NAME_MAX_LENGTH} characters or less`);
         }
         
         if (details.companyNames && details.companyNames.length > VALIDATION_LIMITS.COMPANY_NAME_MAX_LENGTH) {
-            errors.push(`Company names must be ${VALIDATION_LIMITS.COMPANY_NAME_MAX_LENGTH} characters or less`);
+            errors.push(`Counterparty name(s) must be ${VALIDATION_LIMITS.COMPANY_NAME_MAX_LENGTH} characters or less`);
         }
         
         if (details.description && details.description.length > VALIDATION_LIMITS.DESCRIPTION_MAX_LENGTH) {
@@ -1479,11 +1987,30 @@ function showReviewModal() {
         
         if (formData.signatureDetails.needsTranslation) {
             html += `<p><strong>Needs Translation:</strong> Yes</p>`;
+            if (formData.signatureDetails.translationLanguage) {
+                html += `<p><strong>Translation Language:</strong> ${formData.signatureDetails.translationLanguage}</p>`;
+            }
+        }
+        
+        // Show signers for E-Signature
+        if (formData.signatureDetails.signatureType === 'eSignature' && formData.signatureDetails.signers && formData.signatureDetails.signers.length > 0) {
+            html += `<p><strong>Signers (in signing order):</strong></p>`;
+            html += `<ol style="margin: 0.5rem 0 1rem 1.5rem;">`;
+            formData.signatureDetails.signers.forEach(signer => {
+                const titleText = signer.title ? ` - ${signer.title}` : '';
+                html += `<li style="margin-bottom: 0.25rem;">${signer.name}${titleText} (${signer.email})</li>`;
+            });
+            html += `</ol>`;
         }
         
         if (formData.signatureDetails.signatureType === 'wetInk') {
             const wetInkOptionsFormatted = formData.signatureDetails.wetInkOptions.map(opt => toTitleCase(opt)).join(', ');
             html += `<p><strong>Wet Ink Options:</strong> ${wetInkOptionsFormatted}</p>`;
+            
+            // Show scanned copy preference
+            if (formData.signatureDetails.scannedCopy) {
+                html += `<p><strong>Scanned Copy Needed:</strong> ${formData.signatureDetails.scannedCopy === 'yes' ? 'Yes' : 'No'}</p>`;
+            }
             
             // Show apostille country if apostille is required
             if (formData.signatureDetails.notarization && formData.signatureDetails.notarization.apostille === 'yes') {
@@ -1497,8 +2024,8 @@ function showReviewModal() {
         html += `<h4>Contract Pull Details</h4>`;
         html += `<p><strong>Sales Contract:</strong> ${formData.contractPullDetails.salesContract === 'yes' ? 'Yes' : 'No'}</p>`;
         html += `<p><strong>Entity:</strong> ${toTitleCase(formData.contractPullDetails.originatingEntity)}</p>`;
-        html += `<p><strong>Agreement:</strong> ${formData.contractPullDetails.agreementName}</p>`;
-        html += `<p><strong>Description:</strong> ${formData.contractPullDetails.description}</p>`;
+        html += `<p><strong>Agreement Type:</strong> ${formData.contractPullDetails.agreementName}</p>`;
+        html += `<p><strong>Reason for Request:</strong> ${formData.contractPullDetails.description}</p>`;
     } else if (formData.helpType === 'other' && formData.otherDetails) {
         html += `<h4>Request Details</h4>`;
         html += `<p>${formData.otherDetails.description}</p>`;
@@ -1548,7 +2075,13 @@ function generateSignatureTitle(signatureDetails) {
     // Add key features
     const features = [];
     if (signatureDetails.needsTranslation) {
-        features.push('Translation');
+        const lang = signatureDetails.translationLanguage || 'Translation';
+        features.push(lang);
+    }
+    // Add signers count for E-Signature
+    if (signatureDetails.signatureType === 'eSignature' && signatureDetails.signers && signatureDetails.signers.length > 0) {
+        const signerCount = signatureDetails.signers.length;
+        features.push(`${signerCount} signer${signerCount > 1 ? 's' : ''}`);
     }
     if (signatureDetails.wetInkOptions) {
         if (signatureDetails.wetInkOptions.includes('notarize')) {
@@ -1578,7 +2111,7 @@ function generateSignatureTitle(signatureDetails) {
 function generateContractPullTitle(contractPullDetails) {
     const parts = ['Contract Pull'];
     
-    // Add agreement name
+    // Add agreement type
     if (contractPullDetails.agreementName && contractPullDetails.agreementName.trim()) {
         const agreementName = contractPullDetails.agreementName.trim();
         // Truncate if too long
@@ -1696,8 +2229,18 @@ function collectSignatureData() {
         files: files,
         signatureType: getRadioValue('signatureType'),
         needsTranslation: document.getElementById('needsTranslation')?.checked || false,
+        translationLanguage: document.getElementById('translationLanguage')?.value || '',
         additionalNotes: document.getElementById('signatureNotes')?.value || ''
     };
+    
+    // If E-Signature, collect signers
+    if (data.signatureType === 'eSignature') {
+        data.signers = signers.map(s => ({
+            name: s.name,
+            email: s.email,
+            signingOrder: s.order
+        }));
+    }
     
     // If Wet Ink, collect additional details
     if (data.signatureType === 'wetInk') {
@@ -1854,11 +2397,17 @@ onReady(() => {
     contractPullSection = document.getElementById('contractPullSection');
     otherSection = document.getElementById('otherSection');
     wetInkSection = document.getElementById('wetInkSection');
+    eSignatureSection = document.getElementById('eSignatureSection');
     notarizationSection = document.getElementById('notarizationSection');
     stateField = document.getElementById('stateField');
     countryField = document.getElementById('countryField');
     apostilleCountryField = document.getElementById('apostilleCountryField');
     mailingAddressSection = document.getElementById('mailingAddressSection');
+    approvalDocSection = document.getElementById('approvalDocSection');
+    translationLanguageSection = document.getElementById('translationLanguageSection');
+    
+    // Initialize E-Signature signer form
+    initSignerForm();
     
     // Initialize summary panel toggle elements
     summaryPanelToggle = document.getElementById('summaryPanelToggle');
@@ -1956,6 +2505,12 @@ onReady(() => {
         radio.addEventListener('change', handleSignatureTypeChange);
     });
     
+    // Level 2: Needs Translation checkbox
+    const needsTranslationCheckbox = document.getElementById('needsTranslation');
+    if (needsTranslationCheckbox) {
+        needsTranslationCheckbox.addEventListener('change', handleNeedsTranslationChange);
+    }
+    
     // Level 3: Notarize checkbox
     const notarizeCheckbox = document.getElementById('wetInkNotarize');
     if (notarizeCheckbox) {
@@ -1980,6 +2535,12 @@ onReady(() => {
         radio.addEventListener('change', handleApostilleChange);
     });
     
+    // Already approved selection (show approval documentation upload when Yes is selected)
+    const alreadyApprovedRadios = document.querySelectorAll('input[name="alreadyApproved"]');
+    alreadyApprovedRadios.forEach(radio => {
+        radio.addEventListener('change', handleAlreadyApprovedChange);
+    });
+    
     // Level 5: Wet Ink originals handling (show mailing address when Mail originals is selected)
     const wetInkOriginalsRadios = document.querySelectorAll('input[name="wetInkOriginals"]');
     wetInkOriginalsRadios.forEach(radio => {
@@ -1991,6 +2552,17 @@ onReady(() => {
     if (fileToSign) {
         fileToSign.addEventListener('change', function(e) {
             displayFileList(e.target, 'signatureFileList');
+            updateProgress();
+            updateSummary();
+            scheduleAutoSave();
+        });
+    }
+    
+    // File upload handler for approval documentation
+    const approvalDoc = document.getElementById('approvalDoc');
+    if (approvalDoc) {
+        approvalDoc.addEventListener('change', function(e) {
+            displayFileList(e.target, 'approvalDocFileList');
             updateProgress();
             updateSummary();
             scheduleAutoSave();

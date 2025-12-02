@@ -55,10 +55,10 @@ No installation required! This is a pure frontend application that runs in your 
 ### Demo Users
 
 **Employees:**
-- Macho Man (Business Development)
+- Dwight (Business Development)
 
 **Legal Admins:**
-- Vince McMahon (Legal)
+- Michael (Legal)
 
 ## Project Structure
 

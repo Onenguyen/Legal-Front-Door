@@ -3,7 +3,7 @@ import { getCurrentUser, setCurrentUser, getUserFavorites } from '../core/state.
 import { getUsers } from '../core/state.js';
 import { DEPARTMENT_OPTIONS, INTAKE_FORMS, ICON_TYPES } from '../core/constants.js';
 import { renderDepartmentCard } from '../components/request-card.js';
-import { renderChatbot, initChatbot } from '../components/chatbot.js';
+import { renderChatbot, initChatbot } from '../components/chatbot.js?v=3';
 import { getIcon } from '../components/icons.js';
 import { escapeHtml, onReady } from '../utils/dom.js';
 
@@ -26,10 +26,10 @@ function launchFavorite(favorite) {
 function renderFavorites() {
     let currentUser = getCurrentUser();
     if (!currentUser) {
-        // Default to Macho Man (employee) if not set
+        // Default to Dwight (employee) if not set
         const users = getUsers();
         if (users.length > 0) {
-            currentUser = users.find(u => u.name === 'Macho Man') || users[0];
+            currentUser = users.find(u => u.name === 'Dwight') || users[0];
             setCurrentUser(currentUser);
         }
     }

@@ -66,7 +66,7 @@ function parseRequestDetails(request) {
         // Handle different help types (excluding files)
         if (data.helpType === 'contractPull' && data.contractPullDetails) {
             if (data.contractPullDetails.agreementName) {
-                details.items.push({ label: 'Agreement', value: truncateText(data.contractPullDetails.agreementName, 30) });
+                details.items.push({ label: 'Agreement Type', value: truncateText(data.contractPullDetails.agreementName, 30) });
             }
             if (data.contractPullDetails.originatingEntity) {
                 details.items.push({ label: 'Entity', value: toTitleCase(data.contractPullDetails.originatingEntity) });

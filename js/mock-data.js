@@ -25,19 +25,19 @@ function initializeMockData() {
         // Clear any existing sample data first (only on first init)
         clearSampleData();
         
-        // Create default users: Macho Man (employee) and Vince McMahon (admin)
+        // Create default users: Dwight (employee) and Michael (admin)
         const defaultUsers = [
             {
-                id: 'user_machoMan',
-                name: 'Macho Man',
-                email: 'machoman@cohesity.com',
+                id: 'user_dwight',
+                name: 'Dwight',
+                email: 'dwight@cohesity.com',
                 role: 'employee',
                 department: 'Business Development'
             },
             {
-                id: 'user_vinceMcMahon',
-                name: 'Vince McMahon',
-                email: 'vince.mcmahon@cohesity.com',
+                id: 'user_michael',
+                name: 'Michael',
+                email: 'michael@cohesity.com',
                 role: 'admin',
                 department: 'Legal'
             }
@@ -47,7 +47,7 @@ function initializeMockData() {
         const defaultFavorites = [
             {
                 id: 'fav_lops_intake',
-                userId: 'user_machoMan',
+                userId: 'user_dwight',
                 name: 'Legal Operations General Intake',
                 prefill: {
                     department: '',

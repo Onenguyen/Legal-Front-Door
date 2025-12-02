@@ -93,6 +93,7 @@ const WET_INK_ORIGINALS_LABELS = {
     mailOriginals: 'Mail originals',
     fileWithLegal: 'File with Legal',
     destroy: 'Destroy',
+    scannedCopy: 'Scanned Copy',
     other: 'Other'
 };
 
@@ -467,7 +468,14 @@ function buildSignatureItems(details, items, notes) {
     }
     
     if (typeof details.needsTranslation === 'boolean') {
-        items.push({ label: 'Needs Translation', value: details.needsTranslation ? 'Yes' : 'No' });
+        if (details.needsTranslation) {
+            const translationValue = details.translationLanguage 
+                ? `Yes (${details.translationLanguage})` 
+                : 'Yes';
+            items.push({ label: 'Needs Translation', value: translationValue });
+        } else {
+            items.push({ label: 'Needs Translation', value: 'No' });
+        }
     }
     
     if (Array.isArray(details.wetInkOptions) && details.wetInkOptions.length > 0) {
@@ -549,12 +557,12 @@ function buildContractPullItems(details, items, notes) {
     
     const companyNames = details.companyNames?.trim();
     if (companyNames) {
-        items.push({ label: 'Company Names', value: companyNames });
+        items.push({ label: 'Counterparty Name (s)', value: companyNames });
     }
     
     const agreementName = details.agreementName?.trim();
     if (agreementName) {
-        items.push({ label: 'Agreement Name', value: agreementName });
+        items.push({ label: 'Agreement Type', value: agreementName });
     }
     
     const description = details.description?.trim();

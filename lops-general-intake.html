@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/main.css?v=3">
 </head>
 <body>
     <div id="navbar"></div>
@@ -104,16 +104,83 @@
                                 </label>
                             </div>
                         </div>
+
+                        <!-- Translation Language Selection (Conditional - shown when Needs Translation is checked) -->
+                        <div id="translationLanguageSection" class="form-group conditional-section" style="display: none;">
+                            <label for="translationLanguage">Select Language <span class="required-indicator">*</span></label>
+                            <select id="translationLanguage" class="form-control">
+                                <option value="">-- Select Language --</option>
+                                <option value="Spanish">Spanish</option>
+                                <option value="French">French</option>
+                                <option value="German">German</option>
+                                <option value="Italian">Italian</option>
+                                <option value="Portuguese">Portuguese</option>
+                                <option value="Chinese (Simplified)">Chinese (Simplified)</option>
+                                <option value="Chinese (Traditional)">Chinese (Traditional)</option>
+                                <option value="Japanese">Japanese</option>
+                                <option value="Korean">Korean</option>
+                                <option value="Arabic">Arabic</option>
+                                <option value="Hindi">Hindi</option>
+                                <option value="Russian">Russian</option>
+                                <option value="Dutch">Dutch</option>
+                                <option value="Swedish">Swedish</option>
+                                <option value="Norwegian">Norwegian</option>
+                                <option value="Danish">Danish</option>
+                                <option value="Finnish">Finnish</option>
+                                <option value="Polish">Polish</option>
+                                <option value="Turkish">Turkish</option>
+                                <option value="Hebrew">Hebrew</option>
+                                <option value="Thai">Thai</option>
+                                <option value="Vietnamese">Vietnamese</option>
+                                <option value="Indonesian">Indonesian</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- E-Signature Signers Section (Conditional - shown when E-Signature is selected) -->
+                    <div id="eSignatureSection" class="conditional-section nested-conditional" style="display: none;">
+                        <div class="form-group signers-section">
+                            <label>Who needs to sign? <span class="required-indicator">*</span></label>
+                            
+                            <!-- Added Signers List -->
+                            <div id="signersList" class="signers-list signers-list-compact">
+                                <!-- Signers will be added here dynamically -->
+                            </div>
+                            
+                            <!-- Compact Signer Input Form -->
+                            <div class="signer-form-compact">
+                                <div class="signer-form-compact-inputs">
+                                    <input type="text" id="newSignerName" class="form-control" placeholder="Full name *">
+                                    <input type="text" id="newSignerTitle" class="form-control" placeholder="Title (optional)">
+                                    <input type="email" id="newSignerEmail" class="form-control" placeholder="Email *">
+                                    <button type="button" id="addSignerBtn" class="btn btn-primary btn-add-signer-compact">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                        <span id="addSignerBtnText">Add</span>
+                                    </button>
+                                </div>
+                                <p class="signer-form-hint-compact" id="signerFormHint">
+                                    <span id="signerCountText">No signers yet</span> · Drag to reorder
+                                </p>
+                            </div>
+                            
+                            <div id="signersError" class="signers-error" style="display: none;">
+                                Please add at least one signer
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Wet Ink Options (Conditional - shown when Wet Ink is selected) -->
                     <div id="wetInkSection" class="conditional-section nested-conditional" style="display: none;">
                         <div class="form-group">
-                            <label>Which Wet Ink options do you need? <span class="required-indicator">*</span></label>
+                            <label>Do you need any of these Wet Ink Options?</label>
                             <div class="checkbox-group checkbox-group-horizontal">
                                 <label class="checkbox-option">
                                     <input type="checkbox" id="wetInkNotarize" name="wetInkOptions" value="notarize">
-                                    <span class="checkbox-label">Notarize</span>
+                                    <span class="checkbox-label">Notary</span>
                                 </label>
                                 <label class="checkbox-option">
                                     <input type="checkbox" id="wetInkStampSeal" name="wetInkOptions" value="stampSeal">
@@ -156,7 +223,7 @@
 
                                 <div class="form-row">
                                     <div class="form-group" style="flex: 0 0 auto;">
-                                        <label>Where will the notarization take place? <span class="required-indicator">*</span></label>
+                                        <label>Where will the notary take place? <span class="required-indicator">*</span></label>
                                         <div class="radio-group radio-group-horizontal">
                                             <label class="radio-option">
                                                 <input type="radio" name="notarizationLocation" value="unitedStates">
@@ -262,20 +329,6 @@
 
                                 <div class="form-row">
                                     <div class="form-group" style="flex: 0 0 auto;">
-                                        <label>Need a scanned copy? <span class="required-indicator">*</span></label>
-                                        <div class="radio-group radio-group-horizontal">
-                                            <label class="radio-option">
-                                                <input type="radio" name="scannedCopy" value="yes">
-                                                <span class="radio-label">Yes</span>
-                                            </label>
-                                            <label class="radio-option">
-                                                <input type="radio" name="scannedCopy" value="no">
-                                                <span class="radio-label">No</span>
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group" style="flex: 0 0 auto;">
                                         <label for="wetInkCopies">How many copies? <span class="required-indicator">*</span></label>
                                         <div class="number-counter">
                                             <button type="button" class="counter-btn counter-decrement" onclick="decrementCounter('wetInkCopies')">−</button>
@@ -301,12 +354,31 @@
                                         <span class="radio-label">Destroy</span>
                                     </label>
                                     <label class="radio-option">
+                                        <input type="radio" name="wetInkOriginals" value="scannedCopy">
+                                        <span class="radio-label">Scanned Copy</span>
+                                    </label>
+                                    <label class="radio-option">
                                         <input type="radio" name="wetInkOriginals" value="other">
                                         <span class="radio-label">Other</span>
                                     </label>
                                 </div>
                             </div>
 
+                        </div>
+
+                        <!-- Scanned Copy Question -->
+                        <div class="form-group">
+                            <label>Need a scanned copy? <span class="required-indicator">*</span></label>
+                            <div class="radio-group radio-group-horizontal">
+                                <label class="radio-option">
+                                    <input type="radio" name="scannedCopy" value="yes">
+                                    <span class="radio-label">Yes</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="scannedCopy" value="no">
+                                    <span class="radio-label">No</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -350,8 +422,32 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="signatureNotes">Is there anything else we should know?</label>
-                        <textarea id="signatureNotes" class="form-control" rows="4" placeholder="Additional information..."></textarea>
+                        <label>Has this request already been approved? <span class="required-indicator">*</span></label>
+                        <div class="radio-group radio-group-horizontal">
+                            <label class="radio-option">
+                                <input type="radio" name="alreadyApproved" value="yes">
+                                <span class="radio-label">Yes</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="alreadyApproved" value="no" checked>
+                                <span class="radio-label">No</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Approval Documentation (Conditional - shown when Yes is selected) -->
+                    <div id="approvalDocSection" class="conditional-section nested-conditional" style="display: none;">
+                        <div class="form-group">
+                            <label for="approvalDoc">Upload approval documentation <span class="required-indicator">*</span></label>
+                            <input type="file" id="approvalDoc" class="form-control" multiple>
+                            <small class="form-text">Please attach documentation showing the approval</small>
+                            <div id="approvalDocFileList" class="file-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signatureNotes">Reason for Request <span class="required-indicator">*</span></label>
+                        <textarea id="signatureNotes" class="form-control" rows="4" placeholder="Additional information..." required></textarea>
                     </div>
                 </fieldset>
 
@@ -391,19 +487,55 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="companyNames">Company Name(s)</label>
-                            <textarea id="companyNames" class="form-control" rows="3" placeholder="Enter company name(s)..."></textarea>
+                            <label for="companyNames">Counterparty Name (s) <span class="required-indicator">*</span></label>
+                            <textarea id="companyNames" class="form-control" rows="3" placeholder="Enter counterparty name(s)..." required></textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="agreementName">Agreement Name <span class="required-indicator">*</span></label>
-                            <input type="text" id="agreementName" class="form-control" placeholder="Enter agreement name">
+                            <label for="agreementName">Agreement Type <span class="required-indicator">*</span></label>
+                            <select id="agreementName" class="form-control" required>
+                                <option value="">-- Select Agreement Type --</option>
+                                <option value="Adoption Agreement">Adoption Agreement</option>
+                                <option value="Addendum">Addendum</option>
+                                <option value="Amendment">Amendment</option>
+                                <option value="Agreement Other">Agreement Other</option>
+                                <option value="Agreement Transfer">Agreement Transfer</option>
+                                <option value="Asset Transfer Agreement">Asset Transfer Agreement</option>
+                                <option value="Business Associate Addendum (BAA)">Business Associate Addendum (BAA)</option>
+                                <option value="Change Order">Change Order</option>
+                                <option value="Click Through T&Cs">Click Through T&Cs</option>
+                                <option value="Data Processing Addendum (DPA)">Data Processing Addendum (DPA)</option>
+                                <option value="Distribution Agreement">Distribution Agreement</option>
+                                <option value="Engagement Letter">Engagement Letter</option>
+                                <option value="Evaluation Agreement">Evaluation Agreement</option>
+                                <option value="Insertion Order">Insertion Order</option>
+                                <option value="Lease">Lease</option>
+                                <option value="Letter - CSAT">Letter - CSAT</option>
+                                <option value="Letter - Feature Commit">Letter - Feature Commit</option>
+                                <option value="Letter - Name Change">Letter - Name Change</option>
+                                <option value="Letter - Price Hold">Letter - Price Hold</option>
+                                <option value="Letter - Storage Sizing Guarantee">Letter - Storage Sizing Guarantee</option>
+                                <option value="Letter - Universal Conversion">Letter - Universal Conversion</option>
+                                <option value="Marketing Development Fund Agreement (MDF)">Marketing Development Fund Agreement (MDF)</option>
+                                <option value="Master Agreement (MA)">Master Agreement (MA)</option>
+                                <option value="NDA">NDA</option>
+                                <option value="Non Disclosure Agreement">Non Disclosure Agreement</option>
+                                <option value="Novation">Novation</option>
+                                <option value="Order Form">Order Form</option>
+                                <option value="Other">Other</option>
+                                <option value="Professional Services">Professional Services</option>
+                                <option value="Proof of Concept (POC)">Proof of Concept (POC)</option>
+                                <option value="Reseller Agreement">Reseller Agreement</option>
+                                <option value="RFI / RFX">RFI / RFX</option>
+                                <option value="Statement of Work">Statement of Work</option>
+                                <option value="Termination Letter">Termination Letter</option>
+                            </select>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="contractPullDescription">Tell Us What You Need <span class="required-indicator">*</span></label>
-                        <textarea id="contractPullDescription" class="form-control" rows="4" placeholder="Describe what you need..."></textarea>
+                        <label for="contractPullDescription">Reason for Request <span class="required-indicator">*</span></label>
+                        <textarea id="contractPullDescription" class="form-control" rows="4" placeholder="Enter reason for request..."></textarea>
                     </div>
                 </fieldset>
 
@@ -514,7 +646,7 @@
         import { autoInitNavbar } from './js/components/navbar.js';
         autoInitNavbar();
     </script>
-    <script type="module" src="js/pages/forms/lops-general-intake.js"></script>
+    <script type="module" src="js/pages/forms/lops-general-intake.js?v=2"></script>
 </body>
 </html>
 

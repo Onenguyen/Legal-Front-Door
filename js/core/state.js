@@ -136,8 +136,8 @@ export function initializeDefaultUser() {
     if (!currentUser) {
         const users = getUsers();
         if (users.length > 0) {
-            // Default to Macho Man (employee) if available
-            currentUser = users.find(u => u.name === 'Macho Man') || users[0];
+            // Default to Dwight (employee) if available
+            currentUser = users.find(u => u.name === 'Dwight') || users[0];
             setCurrentUser(currentUser);
         }
     }

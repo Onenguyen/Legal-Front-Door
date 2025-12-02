@@ -169,7 +169,8 @@ export const ROUTES = {
     MY_REQUESTS: 'my-requests.html',
     SUBMIT_REQUEST: 'lops-general-intake.html',
     REQUEST_DETAIL: 'request-detail.html',
-    ADMIN_DASHBOARD: 'admin-dashboard.html'
+    ADMIN_DASHBOARD: 'admin-dashboard.html',
+    LEARNING: 'learning.html'
 };
 
 // Intake Forms
