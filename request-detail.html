@@ -8,6 +8,91 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
+    <style>
+        /* Status Progress Timeline - Ensures proper rendering */
+        .status-progress-timeline {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: flex-start !important;
+            justify-content: space-between;
+            padding: 1.25rem 1.5rem 1.25rem 2rem;
+            margin: 0;
+            border-bottom: 1px solid var(--separator-translucent);
+            background: var(--background-tertiary);
+        }
+        .status-step {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 0.5rem;
+            flex: 0 0 auto;
+            min-width: 70px;
+        }
+        .status-step-indicator {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            background: var(--fill-tertiary);
+            border: 2px solid var(--separator-opaque);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .status-step-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-quaternary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .status-step-label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.625rem;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            text-align: center;
+        }
+        .status-step-connector {
+            flex: 1;
+            height: 2px;
+            background: var(--separator-opaque);
+            margin-top: 13px;
+            min-width: 16px;
+        }
+        .status-step.completed .status-step-indicator {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .status-step.completed .status-step-dot {
+            background: #FFFFFF;
+            width: 10px;
+            height: 10px;
+        }
+        .status-step.completed .status-step-label {
+            color: var(--text-secondary);
+        }
+        .status-step-connector.completed {
+            background: var(--primary-color);
+        }
+        .status-step.active .status-step-indicator {
+            background: var(--background);
+            border-color: var(--primary-color);
+            border-width: 3px;
+            box-shadow: 0 0 0 4px rgba(0, 255, 163, 0.2);
+        }
+        .status-step.active .status-step-dot {
+            background: var(--primary-color);
+            width: 10px;
+            height: 10px;
+        }
+        .status-step.active .status-step-label {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
     <div id="navbar"></div>
@@ -18,157 +103,190 @@
             <h1 id="requestTitle">Request Details</h1>
         </div>
 
-        <!-- Tabs Navigation -->
-        <div class="tabs-container">
-            <div class="tabs-nav">
-                <button class="tab-btn active" data-tab="request-info">Request Information</button>
-                <button class="tab-btn" data-tab="timeline">Timeline</button>
-            </div>
-
-            <!-- Tab Content -->
-            <div class="tab-content active" id="request-info-tab">
-                <div class="detail-layout">
-                    <div class="detail-main">
-                        <div class="card" style="padding: 0 !important;">
-                            <div class="card-header" style="border-bottom: 1px solid var(--separator-translucent); padding: 1.5rem 1.5rem 0.75rem 2rem; display: flex; justify-content: space-between; align-items: center;">
-                                <h3 style="margin: 0;">Request Information</h3>
-                                <div class="card-header-actions" style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <span id="requestStatus" class="status-text"></span>
-                                    <div class="action-menu-container" id="actionMenuContainer" style="display: none;">
-                                        <button class="action-menu-btn" id="actionMenuBtn" aria-label="Actions">
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <circle cx="12" cy="5" r="2" fill="currentColor"/>
-                                                <circle cx="12" cy="12" r="2" fill="currentColor"/>
-                                                <circle cx="12" cy="19" r="2" fill="currentColor"/>
-                                            </svg>
-                                        </button>
-                                        <div class="action-menu-dropdown" id="actionMenuDropdown">
-                                            <button class="action-menu-item" id="editRequestBtn">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                                </svg>
-                                                Edit Request
-                                            </button>
-                                            <button class="action-menu-item" id="cloneRequestBtn">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                                </svg>
-                                                Clone Request
-                                            </button>
-                                            <button class="action-menu-item action-menu-item-danger" id="deleteRequestBtn">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <polyline points="3 6 5 6 21 6"></polyline>
-                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                                </svg>
-                                                Delete Request
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="detail-grid" style="padding: 0rem 1.5rem 0rem 2rem; margin-top: 0.75rem; margin-bottom: 0.75rem;">
-                                <div class="detail-item">
-                                    <label>Request ID:</label>
-                                    <span id="requestId"></span>
-                                </div>
-                                <div class="detail-item">
-                                    <label>Type:</label>
-                                    <span id="requestType"></span>
-                                </div>
-                                <div class="detail-item">
-                                    <label>Priority:</label>
-                                    <span id="requestPriority"></span>
-                                </div>
-                                <div class="detail-item">
-                                    <label>Department:</label>
-                                    <span id="requestDepartment"></span>
-                                </div>
-                                <div class="detail-item">
-                                    <label>Submitted By:</label>
-                                    <span id="requestSubmitter"></span>
-                                </div>
-                                <div class="detail-item">
-                                    <label>Submitted Date:</label>
-                                    <span id="requestDate"></span>
-                                </div>
-                                <div class="detail-item">
-                                    <label>Assigned To:</label>
-                                    <span id="requestAssignedTo"></span>
-                                </div>
-                            </div>
-                            <div class="detail-description" style="padding-left: 2rem; padding-right: 1.5rem;">
-                                <div id="requestDescription" class="request-description-body"></div>
-                            </div>
-                            <div id="filesSection" class="detail-files" style="display: none; padding-left: 2rem; padding-right: 1.5rem; padding-bottom: 1.5rem;">
-                                <label>Attached Files:</label>
-                                <ul id="filesList"></ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="detail-sidebar">
-                        <div id="adminActions" class="card" style="display: none; margin-bottom: 1.5rem; padding: 0 !important;">
-                            <div class="card-header" style="border-bottom: 1px solid var(--separator-translucent); padding: 1.5rem 1.5rem 0.75rem 2rem;">
-                                <h3 style="margin: 0;">Reviewer Actions</h3>
-                            </div>
-                            <div style="padding: 0rem 1.5rem 1.5rem 2rem; margin-top: 0.75rem;">
-                            <div class="form-group" style="margin-bottom: 1rem;">
-                                <label>Update Status:</label>
-                                <select id="statusSelect" class="form-control">
-                                    <option value="Submitted">Submitted</option>
-                                    <option value="Under Review">Under Review</option>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Resolved">Resolved</option>
-                                    <option value="Closed">Closed</option>
-                                </select>
-                            </div>
-                            <div class="form-group" style="margin-bottom: 1.5rem;">
-                                <label>Assign To:</label>
-                                <select id="assignSelect" class="form-control">
-                                    <option value="">Unassigned</option>
-                                    <!-- Admin users populated dynamically -->
-                                </select>
-                            </div>
-                            <button id="updateAssignmentBtn" class="btn btn-primary btn-block">UPDATE</button>
-                            </div>
-                        </div>
-
-                        <div id="commentsCard" class="card comments-card-compact">
-                            <div class="card-header" style="border-bottom: 1px solid var(--separator-translucent); padding: 1.5rem 1.5rem 0.75rem 2rem !important;">
-                                <h3 style="margin: 0;">Comments</h3>
-                            </div>
-                            
-                            <div id="commentsSection" class="comments-feed">
-                                <!-- Comments will be populated here -->
-                            </div>
-                            <div id="commentsToggleWrapper" class="comments-toggle-wrapper">
-                                <button id="showMoreCommentsBtn" class="comments-toggle-btn" type="button">Show all comments</button>
-                            </div>
-
-                            <div class="comment-input-area">
-                                <div class="input-wrapper">
-                                    <input type="text" id="newComment" class="comment-input" placeholder="Type a message..." autocomplete="off">
-                                    <button id="addCommentBtn" class="send-btn" aria-label="Send">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <line x1="22" y1="2" x2="11" y2="13"></line>
-                                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        <div class="detail-layout">
+            <div class="detail-main">
+                <div class="card request-info-card">
+                    <div class="card-header request-info-header">
+                        <h3>Request Information</h3>
+                        <div class="card-header-actions">
+                            <div class="action-menu-container" id="actionMenuContainer" style="display: none;">
+                                <button class="action-menu-btn" id="actionMenuBtn" aria-label="Actions">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="12" cy="5" r="2" fill="currentColor"/>
+                                        <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                                        <circle cx="12" cy="19" r="2" fill="currentColor"/>
+                                    </svg>
+                                </button>
+                                <div class="action-menu-dropdown" id="actionMenuDropdown">
+                                    <button class="action-menu-item" id="editRequestBtn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                         </svg>
+                                        Edit Request
+                                    </button>
+                                    <button class="action-menu-item" id="cloneRequestBtn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                        </svg>
+                                        Clone Request
+                                    </button>
+                                    <button class="action-menu-item action-menu-item-danger" id="deleteRequestBtn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        </svg>
+                                        Delete Request
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <!-- Summary Band -->
+                    <div class="request-summary">
+                        <div class="request-summary-main">
+                            <span id="requestSummaryLine" class="request-summary-line"></span>
+                        </div>
+                    </div>
+                    <!-- Status Progress Timeline -->
+                    <div class="status-progress-timeline" id="statusProgressTimeline">
+                        <div class="status-step" data-status="Submitted">
+                            <div class="status-step-indicator">
+                                <div class="status-step-dot"></div>
+                            </div>
+                            <span class="status-step-label">Submitted</span>
+                        </div>
+                        <div class="status-step-connector"></div>
+                        <div class="status-step" data-status="Under Review">
+                            <div class="status-step-indicator">
+                                <div class="status-step-dot"></div>
+                            </div>
+                            <span class="status-step-label">Under Review</span>
+                        </div>
+                        <div class="status-step-connector"></div>
+                        <div class="status-step" data-status="In Progress">
+                            <div class="status-step-indicator">
+                                <div class="status-step-dot"></div>
+                            </div>
+                            <span class="status-step-label">In Progress</span>
+                        </div>
+                        <div class="status-step-connector"></div>
+                        <div class="status-step" data-status="Resolved">
+                            <div class="status-step-indicator">
+                                <div class="status-step-dot"></div>
+                            </div>
+                            <span class="status-step-label">Resolved</span>
+                        </div>
+                        <div class="status-step-connector"></div>
+                        <div class="status-step" data-status="Closed">
+                            <div class="status-step-indicator">
+                                <div class="status-step-dot"></div>
+                            </div>
+                            <span class="status-step-label">Closed</span>
+                        </div>
+                    </div>
+                    <!-- Details Grid -->
+                    <div class="detail-grid request-detail-grid">
+                        <div class="detail-item">
+                            <label>Help Needed</label>
+                            <span id="requestHelpNeeded"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Submitted By</label>
+                            <span id="requestSubmitter"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Submitted</label>
+                            <span id="requestDate"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Need By</label>
+                            <span id="requestNeedBy"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Priority</label>
+                            <span id="requestPriorityText"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Assigned To</label>
+                            <span id="requestAssignedTo"></span>
+                        </div>
+                    </div>
+                    <!-- Hidden fields for JS compatibility -->
+                    <span id="requestId" style="display:none;"></span>
+                    <span id="requestType" style="display:none;"></span>
+                    <span id="requestDepartment" style="display:none;"></span>
+                    <span id="requestPriority" style="display:none;"></span>
+                    <!-- Description -->
+                    <div class="detail-description">
+                        <div id="requestDescription" class="request-description-body"></div>
+                    </div>
+                    <!-- Files -->
+                    <div id="filesSection" class="detail-files" style="display: none;">
+                        <label>Attached Files</label>
+                        <ul id="filesList"></ul>
+                    </div>
                 </div>
             </div>
 
-            <div class="tab-content" id="timeline-tab">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Request Timeline</h2>
+            <div class="detail-sidebar">
+                <div id="adminActions" class="card" style="display: none; margin-bottom: 1.5rem; padding: 0 !important;">
+                    <div class="card-header" style="border-bottom: 1px solid var(--separator-translucent); padding: 1.5rem 1.5rem 0.75rem 2rem;">
+                        <h3 style="margin: 0;">Reviewer Actions</h3>
                     </div>
-                    <div id="timeline" class="timeline">
+                    <div style="padding: 0rem 1.5rem 1.5rem 2rem; margin-top: 0.75rem;">
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label>Update Status:</label>
+                            <select id="statusSelect" class="form-control">
+                                <option value="Submitted">Submitted</option>
+                                <option value="Under Review">Under Review</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Resolved">Resolved</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label>Assign To:</label>
+                            <select id="assignSelect" class="form-control">
+                                <option value="">Unassigned</option>
+                                <!-- Admin users populated dynamically -->
+                            </select>
+                        </div>
+                        <button id="updateAssignmentBtn" class="btn btn-primary btn-block">UPDATE</button>
+                    </div>
+                </div>
+
+                <div id="commentsCard" class="card comments-card-compact">
+                    <div class="card-header" style="border-bottom: 1px solid var(--separator-translucent); padding: 1.5rem 1.5rem 0.75rem 2rem !important;">
+                        <h3 style="margin: 0;">Comments</h3>
+                    </div>
+                    
+                    <div id="commentsSection" class="comments-feed">
+                        <!-- Comments will be populated here -->
+                    </div>
+                    <div id="commentsToggleWrapper" class="comments-toggle-wrapper">
+                        <button id="showMoreCommentsBtn" class="comments-toggle-btn" type="button">Show all comments</button>
+                    </div>
+
+                    <div class="comment-input-area">
+                        <div class="input-wrapper">
+                            <input type="text" id="newComment" class="comment-input" placeholder="Type a message..." autocomplete="off">
+                            <button id="addCommentBtn" class="send-btn" aria-label="Send">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="timelineCard" class="card" style="margin-top: 1.5rem; padding: 0 !important;">
+                    <div class="card-header" style="border-bottom: 1px solid var(--separator-translucent); padding: 1.5rem 1.5rem 0.75rem 1.5rem !important;">
+                        <h3 style="margin: 0;">Activity</h3>
+                    </div>
+                    <div id="timeline" class="timeline" style="padding: 1rem 1.5rem;">
                         <!-- Timeline will be populated here -->
                     </div>
                 </div>

@@ -75,10 +75,12 @@ function isValidUser(user) {
  */
 function isValidRequest(request) {
     if (!request || typeof request !== 'object') return false;
-    if (typeof request.id !== 'string' || request.id.trim() === '') return false;
-    if (typeof request.title !== 'string') return false;
-    if (typeof request.status !== 'string') return false;
-    if (typeof request.submittedBy !== 'string') return false;
+    // Accept both string and number IDs (coerce to string for comparison)
+    if (request.id === null || request.id === undefined) return false;
+    const idStr = String(request.id).trim();
+    if (idStr === '' || idStr === 'null' || idStr === 'undefined') return false;
+    // Be lenient with other fields - just check they exist (can be any type, will be coerced)
+    // This prevents valid requests from being filtered out due to type mismatches
     return true;
 }
 
@@ -198,8 +200,18 @@ export function getAllRequests() {
     const parsed = safeJsonParse(requests, []);
     
     // Validate and filter invalid entries (C5 fix)
+    // Also normalize fields for consistency
     cache.requests = Array.isArray(parsed)
-        ? parsed.filter(request => isValidRequest(request))
+        ? parsed.filter(request => isValidRequest(request)).map(request => ({
+            ...request,
+            id: String(request.id), // Ensure ID is always a string
+            title: request.title || 'Untitled',
+            status: request.status || 'Submitted',
+            type: request.type || 'Other',
+            priority: request.priority || 'Medium',
+            submittedBy: request.submittedBy || '',
+            submittedDate: request.submittedDate || new Date().toISOString()
+        }))
         : [];
     
     return cache.requests;
@@ -274,7 +286,8 @@ export function createRequest(requestData) {
             {
                 date: new Date().toISOString(),
                 event: 'Request Submitted',
-                status: 'Submitted'
+                status: 'Submitted',
+                userId: currentUser.id
             }
         ]
     };
@@ -286,6 +299,7 @@ export function updateRequestStatus(requestId, newStatus) {
     const request = getRequest(requestId);
     if (!request) return null;
     
+    const currentUser = getCurrentUser();
     request.status = newStatus;
     
     // Add timeline event
@@ -295,7 +309,8 @@ export function updateRequestStatus(requestId, newStatus) {
     request.timeline.push({
         date: new Date().toISOString(),
         event: `Status changed to ${newStatus}`,
-        status: newStatus
+        status: newStatus,
+        userId: currentUser ? currentUser.id : null
     });
     
     return saveRequest(request);
@@ -305,6 +320,7 @@ export function updateRequestAssignment(requestId, assignedToUserId) {
     const request = getRequest(requestId);
     if (!request) return null;
     
+    const currentUser = getCurrentUser();
     request.assignedTo = assignedToUserId || null;
     
     // Add timeline event
@@ -316,7 +332,8 @@ export function updateRequestAssignment(requestId, assignedToUserId) {
     request.timeline.push({
         date: new Date().toISOString(),
         event: `Request assigned to: ${assigneeName}`,
-        status: request.status
+        status: request.status,
+        userId: currentUser ? currentUser.id : null
     });
     
     return saveRequest(request);

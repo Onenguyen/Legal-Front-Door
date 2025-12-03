@@ -199,6 +199,19 @@ export class CustomSelect {
             }
         });
         
+        // Reposition on scroll/resize
+        window.addEventListener('scroll', () => {
+            if (this.isOpen) {
+                this.positionDropdown();
+            }
+        }, true);
+        
+        window.addEventListener('resize', () => {
+            if (this.isOpen) {
+                this.positionDropdown();
+            }
+        });
+        
         // Sync with native select changes
         this.select.addEventListener('change', () => {
             this.updateDisplay();
@@ -348,6 +361,9 @@ export class CustomSelect {
         this.wrapper.classList.add('open');
         this.trigger.setAttribute('aria-expanded', 'true');
         
+        // Position dropdown using fixed positioning
+        this.positionDropdown();
+        
         // Reset search
         if (this.searchInput) {
             this.searchInput.value = '';
@@ -362,6 +378,31 @@ export class CustomSelect {
             this.highlightOption(selectedOption);
         } else {
             this.highlightedIndex = -1;
+        }
+    }
+    
+    positionDropdown() {
+        const triggerRect = this.trigger.getBoundingClientRect();
+        const dropdownHeight = Math.min(280, this.dropdown.scrollHeight);
+        const viewportHeight = window.innerHeight;
+        
+        // Calculate if dropdown should open above or below
+        const spaceBelow = viewportHeight - triggerRect.bottom;
+        const spaceAbove = triggerRect.top;
+        const openAbove = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+        
+        // Set position
+        this.dropdown.style.left = `${triggerRect.left}px`;
+        this.dropdown.style.width = `${triggerRect.width}px`;
+        
+        if (openAbove) {
+            this.dropdown.style.top = 'auto';
+            this.dropdown.style.bottom = `${viewportHeight - triggerRect.top + 4}px`;
+            this.dropdown.style.maxHeight = `${Math.min(280, spaceAbove - 20)}px`;
+        } else {
+            this.dropdown.style.top = `${triggerRect.bottom + 4}px`;
+            this.dropdown.style.bottom = 'auto';
+            this.dropdown.style.maxHeight = `${Math.min(280, spaceBelow - 20)}px`;
         }
     }
     

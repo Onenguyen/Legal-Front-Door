@@ -136,3 +136,123 @@
     }
 }
 
+/* Role Switcher Dropdown */
+.role-switcher-dropdown {
+    position: relative;
+    margin-right: 1rem;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+}
+
+.role-switcher-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    background-color: #FFFFFF;
+    border: 2px solid #000000;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-family: inherit;
+    color: #000000;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 2px 2px 0px #000000;
+    letter-spacing: 0.02em;
+}
+
+.role-switcher-trigger:hover {
+    box-shadow: 3px 3px 0px #000000;
+}
+
+.role-switcher-dropdown.open .role-switcher-trigger {
+    border-color: var(--primary-color);
+    box-shadow: 3px 3px 0px #000000;
+}
+
+.role-switcher-value {
+    white-space: nowrap;
+}
+
+.role-switcher-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.role-switcher-dropdown.open .role-switcher-arrow {
+    transform: rotate(180deg);
+}
+
+.role-switcher-arrow svg {
+    width: 14px;
+    height: 14px;
+    stroke: #000000;
+    stroke-width: 2.5;
+    fill: none;
+}
+
+.role-switcher-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 160px;
+    background: #FFFFFF;
+    border: 2px solid #000000;
+    border-radius: 8px;
+    box-shadow: 4px 4px 0px #000000;
+    z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.role-switcher-dropdown.open .role-switcher-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.role-switcher-group-label {
+    padding: 0.5rem 0.875rem 0.375rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-tertiary);
+    background: var(--background-secondary);
+    border-bottom: 1px solid var(--separator-translucent);
+}
+
+.role-switcher-group-label:not(:first-child) {
+    border-top: 1px solid var(--separator-translucent);
+}
+
+.role-switcher-option {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #000000;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    border-left: 3px solid transparent;
+}
+
+.role-switcher-option:hover {
+    background: var(--primary-light);
+    border-left-color: var(--primary-color);
+}
+
+.role-switcher-option.selected {
+    background: var(--primary-color);
+    font-weight: 600;
+    border-left-color: #000000;
+}
+
+.role-switcher-option.selected:hover {
+    background: var(--primary-hover);
+}
+

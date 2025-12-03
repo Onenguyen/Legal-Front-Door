@@ -7,8 +7,9 @@ export function renderNavbar(activePage = '') {
     const currentUser = getCurrentUser();
     const isAdmin = currentUser && currentUser.role === ROLES.ADMIN;
     
-    // Hide the Submit Request button when already on the form page to avoid confusion
-    const showSubmitButton = activePage !== 'submit';
+    // Hide the Submit Request button and My Requests link when on the learning page
+    const isLearningPage = activePage === 'learning';
+    const showSubmitButton = activePage !== 'submit' && !isLearningPage;
     
     const navHTML = `
         <nav class="navbar">
@@ -19,7 +20,7 @@ export function renderNavbar(activePage = '') {
                 <div class="nav-links">
                     <a href="${ROUTES.HOME}" class="${activePage === 'home' ? 'active' : ''}">Home</a>
                     ${isAdmin ? `<a href="${ROUTES.ADMIN_DASHBOARD}" class="${activePage === 'admin' ? 'active' : ''}">All Requests</a>` : ''}
-                    <a href="${ROUTES.MY_REQUESTS}" class="${activePage === 'my-requests' ? 'active' : ''}">My Requests</a>
+                    ${!isLearningPage ? `<a href="${ROUTES.MY_REQUESTS}" class="${activePage === 'my-requests' ? 'active' : ''}">My Requests</a>` : ''}
                 </div>
                 <div class="nav-actions">
                     ${showSubmitButton ? `<a href="${ROUTES.SUBMIT_REQUEST}" class="btn-submit-request">Submit Request</a>` : ''}
@@ -54,6 +55,8 @@ export function detectActivePage() {
         return 'admin';
     } else if (page === ROUTES.REQUEST_DETAIL) {
         return 'detail';
+    } else if (page === ROUTES.LEARNING) {
+        return 'learning';
     }
     
     return '';

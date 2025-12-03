@@ -49,6 +49,109 @@
     margin-bottom: 1.5rem;
 }
 
+/* Request Info Card Overrides */
+.request-info-card {
+    padding: 0 !important;
+}
+
+.request-info-header {
+    border-bottom: 1px solid var(--separator-translucent);
+    padding: 1.25rem 1.5rem 1rem 2rem;
+    margin-bottom: 0;
+}
+
+.request-info-header h3 {
+    margin: 0;
+}
+
+/* Request Summary Band */
+.request-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--fill-tertiary);
+    padding: 0.875rem 1.5rem 0.875rem 2rem;
+    border-bottom: 1px solid var(--separator-translucent);
+    gap: 1rem;
+}
+
+.request-summary-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.request-summary-line {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.request-summary-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex-shrink: 0;
+}
+
+/* Compact Priority Chip */
+.priority-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: 4px;
+    border: 2px solid #000000;
+    line-height: 1;
+}
+
+.priority-chip.priority-low {
+    background: #E8F5E9;
+    color: #2E7D32;
+}
+
+.priority-chip.priority-medium {
+    background: #FFF8E1;
+    color: #F57C00;
+}
+
+.priority-chip.priority-high {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.priority-chip.priority-urgent {
+    background: #FFEBEE;
+    color: #C62828;
+}
+
+/* Request Detail Grid (refined for new layout) */
+.request-detail-grid {
+    padding: 1.25rem 1.5rem 1.25rem 2rem;
+    margin-bottom: 0;
+    gap: 1.25rem 2rem;
+}
+
+/* Description section inside request info card */
+.request-info-card .detail-description {
+    padding: 1.25rem 1.5rem 1.25rem 2rem;
+    margin-top: 0;
+}
+
+/* Files section inside request info card */
+.request-info-card .detail-files {
+    padding: 0 1.5rem 1.5rem 2rem;
+    margin-top: 0;
+}
+
 /* When sidebar is hidden, use 4 columns for better layout */
 .detail-layout.sidebar-hidden .detail-grid {
     grid-template-columns: repeat(4, 1fr);

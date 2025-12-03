@@ -11,8 +11,11 @@ import {
     deleteRequest
 } from '../core/state.js';
 import { PRIORITY_CLASSES, ROLES } from '../core/constants.js';
-import { onReady, getUrlParam, escapeHtml, toTitleCase, getStatusClass } from '../utils/dom.js';
+import { onReady, getUrlParam, escapeHtml, toTitleCase } from '../utils/dom.js';
 import { formatDate, formatDateTime } from '../utils/date.js';
+
+// Status order for progress timeline
+const STATUS_ORDER = ['Submitted', 'Under Review', 'In Progress', 'Resolved', 'Closed'];
 
 let currentRequest = null;
 let currentUser = null;
@@ -30,7 +33,7 @@ const domElements = {
     requestAssignedTo: null,
     requestDescription: null,
     requestPriority: null,
-    requestStatus: null,
+    statusProgressTimeline: null,
     filesSection: null,
     filesList: null,
     adminActions: null,
@@ -41,7 +44,12 @@ const domElements = {
     commentsToggleWrapper: null,
     showMoreCommentsBtn: null,
     timeline: null,
-    actionMenuContainer: null
+    actionMenuContainer: null,
+    // New summary band elements
+    requestSummaryLine: null,
+    requestPriorityText: null,
+    requestNeedBy: null,
+    requestHelpNeeded: null
 };
 
 // m6 FIX: Initialize DOM element cache
@@ -55,7 +63,7 @@ function initDomCache() {
     domElements.requestAssignedTo = document.getElementById('requestAssignedTo');
     domElements.requestDescription = document.getElementById('requestDescription');
     domElements.requestPriority = document.getElementById('requestPriority');
-    domElements.requestStatus = document.getElementById('requestStatus');
+    domElements.statusProgressTimeline = document.getElementById('statusProgressTimeline');
     domElements.filesSection = document.getElementById('filesSection');
     domElements.filesList = document.getElementById('filesList');
     domElements.adminActions = document.getElementById('adminActions');
@@ -67,6 +75,11 @@ function initDomCache() {
     domElements.showMoreCommentsBtn = document.getElementById('showMoreCommentsBtn');
     domElements.timeline = document.getElementById('timeline');
     domElements.actionMenuContainer = document.getElementById('actionMenuContainer');
+    // New summary band elements
+    domElements.requestSummaryLine = document.getElementById('requestSummaryLine');
+    domElements.requestPriorityText = document.getElementById('requestPriorityText');
+    domElements.requestNeedBy = document.getElementById('requestNeedBy');
+    domElements.requestHelpNeeded = document.getElementById('requestHelpNeeded');
 }
 
 const HELP_TYPE_LABELS = {
@@ -149,11 +162,41 @@ function loadRequestDetails() {
         domElements.requestPriority.appendChild(prioritySpan);
     }
     
-    // Status badge
-    if (domElements.requestStatus) {
-        domElements.requestStatus.textContent = currentRequest.status;
-        const statusClass = getStatusClass(currentRequest.status);
-        domElements.requestStatus.className = `status-badge ${statusClass}`;
+    // Status Progress Timeline
+    updateStatusProgressTimeline(currentRequest.status);
+    
+    // Summary line (REQ-ID • Type)
+    if (domElements.requestSummaryLine) {
+        const summaryParts = [
+            `REQ-${currentRequest.id}`,
+            currentRequest.type
+        ];
+        domElements.requestSummaryLine.textContent = summaryParts.join(' • ');
+    }
+    
+    // Parse form data from description JSON
+    let formData = null;
+    try {
+        formData = currentRequest.description ? JSON.parse(currentRequest.description) : null;
+    } catch (e) {
+        formData = null;
+    }
+    
+    // Help Needed in details grid
+    if (domElements.requestHelpNeeded) {
+        const helpType = formData?.helpType;
+        domElements.requestHelpNeeded.textContent = getHelpTypeLabel(helpType) || '—';
+    }
+    
+    // Priority text in details grid
+    if (domElements.requestPriorityText) {
+        domElements.requestPriorityText.textContent = currentRequest.priority;
+    }
+    
+    // Need By date in details grid
+    if (domElements.requestNeedBy) {
+        const needByDate = formData?.completionDate;
+        domElements.requestNeedBy.textContent = needByDate ? formatDate(needByDate) : '—';
     }
     
     // Files
@@ -236,27 +279,190 @@ function updateSidebarLayout() {
     }
 }
 
+// Get compact relative time (e.g., "19m ago", "Yesterday")
+function getRelativeTimeCompact(dateString) {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffSecs = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    
+    // Check if yesterday
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const isYesterday = date.getDate() === yesterday.getDate() &&
+                        date.getMonth() === yesterday.getMonth() &&
+                        date.getFullYear() === yesterday.getFullYear();
+    
+    if (diffSecs < 60) {
+        return 'Just now';
+    } else if (diffMins < 60) {
+        return `${diffMins}m ago`;
+    } else if (diffHours < 24 && !isYesterday) {
+        return `${diffHours}h ago`;
+    } else if (isYesterday || diffDays === 1) {
+        return 'Yesterday';
+    } else if (diffDays < 7) {
+        return `${diffDays} days ago`;
+    } else {
+        return formatDate(dateString);
+    }
+}
+
+// Timeline icon configurations
+const TIMELINE_ICONS = {
+    status: {
+        class: 'icon-status',
+        svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>`
+    },
+    create: {
+        class: 'icon-create',
+        svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="18" x2="12" y2="12"></line>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+        </svg>`
+    },
+    edit: {
+        class: 'icon-edit',
+        svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>`
+    },
+    assign: {
+        class: 'icon-assign',
+        svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+        </svg>`
+    },
+    comment: {
+        class: 'icon-comment',
+        svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>`
+    },
+    submit: {
+        class: 'icon-submit',
+        svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>`
+    }
+};
+
+// Get timeline icon based on event type
+function getTimelineIcon(event) {
+    const eventLower = event.toLowerCase();
+    
+    if (eventLower.includes('status') || eventLower.includes('changed')) {
+        return TIMELINE_ICONS.status;
+    } else if (eventLower.includes('submitted') || eventLower.includes('created')) {
+        return TIMELINE_ICONS.submit;
+    } else if (eventLower.includes('assigned')) {
+        return TIMELINE_ICONS.assign;
+    } else if (eventLower.includes('edited') || eventLower.includes('updated')) {
+        return TIMELINE_ICONS.edit;
+    } else if (eventLower.includes('comment')) {
+        return TIMELINE_ICONS.comment;
+    }
+    
+    return TIMELINE_ICONS.edit; // default
+}
+
+// Parse timeline event to extract actor, action, and target
+function parseTimelineEvent(eventText, userId) {
+    const actorName = userId ? getUserName(userId) : null;
+    
+    // Try to parse structured events
+    const statusMatch = eventText.match(/Status (?:changed|updated) to[:\s]*(.+)/i);
+    if (statusMatch) {
+        return {
+            actor: actorName,
+            action: 'changed status to',
+            target: statusMatch[1].trim()
+        };
+    }
+    
+    const assignMatch = eventText.match(/(?:Request )?[Aa]ssigned to[:\s]*(.+)/i);
+    if (assignMatch) {
+        return {
+            actor: actorName,
+            action: 'assigned request to',
+            target: assignMatch[1].trim()
+        };
+    }
+    
+    if (eventText.toLowerCase().includes('request submitted')) {
+        return {
+            actor: actorName,
+            action: 'submitted the request',
+            target: null
+        };
+    }
+    
+    // Default: just show the event text
+    return {
+        actor: actorName,
+        action: null,
+        target: eventText
+    };
+}
+
 // Load timeline - m6 FIX: Use cached elements
 function loadTimeline() {
     if (!domElements.timeline || !currentRequest) return;
     const timeline = domElements.timeline;
     
     const events = currentRequest.timeline || [
-        { date: currentRequest.submittedDate, event: 'Request Submitted', status: 'Submitted' }
+        { date: currentRequest.submittedDate, event: 'Request Submitted', status: 'Submitted', userId: currentRequest.submittedBy }
     ];
     
     // Sort events by date (most recent first)
     const sortedEvents = [...events].sort((a, b) => new Date(b.date) - new Date(a.date));
     
-    timeline.innerHTML = sortedEvents.map((event, index) => `
-        <div class="timeline-item" style="animation-delay: ${index * 0.05}s;">
-            <div class="timeline-dot"></div>
-            <div class="timeline-content">
-                <div class="timeline-event">${escapeHtml(event.event)}</div>
-                <div class="timeline-date">${formatDateTime(event.date)}</div>
+    timeline.innerHTML = sortedEvents.map((event, index) => {
+        const icon = getTimelineIcon(event.event);
+        const parsed = parseTimelineEvent(event.event, event.userId);
+        const relativeTime = getRelativeTimeCompact(event.date);
+        
+        // Build the event text with highlighting
+        let eventHtml = '';
+        if (parsed.actor) {
+            eventHtml += `<span class="timeline-actor">${escapeHtml(parsed.actor)}</span> `;
+        }
+        if (parsed.action) {
+            eventHtml += `${escapeHtml(parsed.action)} `;
+        }
+        if (parsed.target) {
+            eventHtml += `<span class="timeline-highlight">${escapeHtml(parsed.target)}</span>`;
+        }
+        
+        // Fallback if no structured content
+        if (!eventHtml.trim()) {
+            eventHtml = escapeHtml(event.event);
+        }
+        
+        return `
+            <div class="timeline-item" style="animation-delay: ${index * 0.05}s;">
+                <div class="timeline-icon ${icon.class}">
+                    ${icon.svg}
+                </div>
+                <div class="timeline-content">
+                    <div class="timeline-event">${eventHtml}</div>
+                    <div class="timeline-date">${relativeTime}</div>
+                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function getInitials(name) {
@@ -401,24 +607,10 @@ function parseStructuredDescription(request) {
         generalItems.push({ label: 'Request Title', value: request.title });
     }
     
-    const helpTypeLabel = getHelpTypeLabel(data.helpType);
-    if (helpTypeLabel) {
-        generalItems.push({ label: 'Help Needed', value: helpTypeLabel });
-    }
-    
-    if (data.completionDate) {
-        generalItems.push({ label: 'Need By', value: formatDate(data.completionDate) });
-    }
-    
     const submittingForValue = data.submittingForOtherDetails?.name
         || (data.submittingForOther ? data.submittingForOther : 'Self');
     if (submittingForValue) {
         generalItems.push({ label: 'Submitting For', value: submittingForValue });
-    }
-    
-    const submittedTimestamp = data.submittedAt || request.submittedDate;
-    if (submittedTimestamp) {
-        generalItems.push({ label: 'Submitted', value: formatDateTime(submittedTimestamp) });
     }
     
     if (Array.isArray(request.files) && request.files.length > 0) {
@@ -465,6 +657,16 @@ function buildSignatureItems(details, items, notes) {
     if (details.signatureType) {
         const label = details.signatureType === 'wetInk' ? 'Wet Ink' : 'E-Signature';
         items.push({ label: 'Signature Type', value: label });
+    }
+    
+    // E-Signature signers
+    if (details.signatureType === 'eSignature' && Array.isArray(details.signers) && details.signers.length > 0) {
+        const signersList = details.signers.map((s, idx) => {
+            const order = s.signingOrder || (idx + 1);
+            const titlePart = s.title ? ` (${s.title})` : '';
+            return `${order}. ${s.name}${titlePart} — ${s.email}`;
+        }).join('; ');
+        items.push({ label: 'Signers', value: signersList });
     }
     
     if (typeof details.needsTranslation === 'boolean') {
@@ -679,28 +881,36 @@ function formatMultilineText(text) {
     return escapeHtml(text).replace(/\n/g, '<br>');
 }
 
-
-
-// Initialize tabs
-function initializeTabs() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
+// Update status progress timeline
+function updateStatusProgressTimeline(currentStatus) {
+    if (!domElements.statusProgressTimeline) return;
     
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const tabName = button.getAttribute('data-tab');
-            
-            // Remove active class from all tabs and buttons
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
-            
-            // Add active class to clicked button and corresponding tab
-            button.classList.add('active');
-            const tabContent = document.getElementById(`${tabName}-tab`);
-            if (tabContent) tabContent.classList.add('active');
-        });
+    const timeline = domElements.statusProgressTimeline;
+    const steps = timeline.querySelectorAll('.status-step');
+    const connectors = timeline.querySelectorAll('.status-step-connector');
+    
+    const currentIndex = STATUS_ORDER.indexOf(currentStatus);
+    
+    steps.forEach((step, index) => {
+        step.classList.remove('completed', 'active');
+        
+        if (index < currentIndex) {
+            step.classList.add('completed');
+        } else if (index === currentIndex) {
+            step.classList.add('active');
+        }
+    });
+    
+    connectors.forEach((connector, index) => {
+        connector.classList.remove('completed');
+        
+        if (index < currentIndex) {
+            connector.classList.add('completed');
+        }
     });
 }
+
+
 
 // Initialize action menu
 function initializeActionMenu() {
@@ -770,7 +980,6 @@ onReady(() => {
     
     currentUser = initializeDefaultUser();
     loadRequestDetails();
-    initializeTabs();
     initializeActionMenu();
     
     // Show more comments toggle - m6 FIX: Use cached elements
@@ -818,8 +1027,6 @@ onReady(() => {
             const newStatus = this.value;
             updateRequestStatus(currentRequest.id, newStatus);
             loadRequestDetails();
-            addComment(currentRequest.id, currentUser.id, `Status updated to: ${newStatus}`);
-            loadComments();
         });
     }
     
@@ -836,10 +1043,6 @@ onReady(() => {
             }
             
             loadRequestDetails();
-            
-            const assigneeName = assignedTo ? getUserName(assignedTo) : 'Unassigned';
-            addComment(currentRequest.id, currentUser.id, `Request assigned to: ${assigneeName}`);
-            loadComments();
         });
     }
 });

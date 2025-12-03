@@ -140,6 +140,76 @@
     border-radius: 0 0 16px 16px;
 }
 
+/* Review Grid Layout */
+.review-section {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--separator-translucent);
+    padding-bottom: 1.5rem;
+}
+
+.review-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.review-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 1rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.review-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem 2rem;
+}
+
+.review-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.review-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.review-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.review-value {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.review-list {
+    margin: 0.5rem 0 0 0;
+    padding-left: 1.5rem;
+}
+
+.review-list li {
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+}
+
+@media (max-width: 600px) {
+    .review-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
 /* Department Modal - Two Panel Layout */
 .department-modal {
     padding: 1.5rem;
@@ -534,4 +604,3 @@
         font-size: 1rem;
     }
 }
-

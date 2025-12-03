@@ -178,82 +178,141 @@ function updateNavigationForAdmin() {
 
 // Role switcher functionality
 function initializeRoleSwitcher() {
+    // Hide role switcher on learning page
+    const path = window.location.pathname;
+    const page = path.substring(path.lastIndexOf('/') + 1);
+    if (page === 'learning.html') return;
+    
     const navActions = document.querySelector('.nav-actions');
     if (!navActions) return;
 
-    // Create container
-    const switcherContainer = document.createElement('div');
-    switcherContainer.className = 'role-switcher';
-    switcherContainer.style.marginRight = '1rem';
-
-    // Create select
-    const select = document.createElement('select');
-    select.className = 'form-control';
-    select.style.padding = '0.4rem 2rem 0.4rem 1rem'; // Compact padding
-    select.style.fontSize = '0.8rem';
-    select.style.width = 'auto';
-    select.style.cursor = 'pointer';
-    select.style.borderColor = '#000000';
-    select.style.height = 'auto';
-
     const users = getUsers();
     const currentUser = getCurrentUser();
+    if (!currentUser) return;
 
     // Group users by role
-    const admins = users.filter(u => u.role === 'admin');
-    const employees = users.filter(u => u.role === 'employee');
+    const reviewers = users.filter(u => u.role === 'admin');
+    const submitters = users.filter(u => u.role === 'employee');
 
-    // Add option group for Admins
-    const adminGroup = document.createElement('optgroup');
-    adminGroup.label = 'Admins';
-    admins.forEach(user => {
-        const option = document.createElement('option');
-        option.value = user.id;
-        option.textContent = user.name;
-        if (currentUser && currentUser.id === user.id) {
-            option.selected = true;
-        }
-        adminGroup.appendChild(option);
-    });
-    select.appendChild(adminGroup);
+    // Create custom select wrapper
+    const wrapper = document.createElement('div');
+    wrapper.className = 'role-switcher-dropdown';
 
-    // Add option group for Employees
-    const empGroup = document.createElement('optgroup');
-    empGroup.label = 'Employees';
-    employees.forEach(user => {
-        const option = document.createElement('option');
-        option.value = user.id;
-        option.textContent = user.name;
-        if (currentUser && currentUser.id === user.id) {
-            option.selected = true;
-        }
-        empGroup.appendChild(option);
-    });
-    select.appendChild(empGroup);
+    // Create trigger button
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'role-switcher-trigger';
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
 
-    select.addEventListener('change', (e) => {
-        const userId = e.target.value;
-        const selectedUser = users.find(u => u.id === userId);
-        if (selectedUser) {
-            setCurrentUser(selectedUser);
-            // Disable browser's automatic scroll restoration
-            if ('scrollRestoration' in history) {
-                history.scrollRestoration = 'manual';
+    // Value display
+    const valueDisplay = document.createElement('span');
+    valueDisplay.className = 'role-switcher-value';
+    valueDisplay.textContent = currentUser.name;
+
+    // Arrow
+    const arrow = document.createElement('span');
+    arrow.className = 'role-switcher-arrow';
+    arrow.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+
+    trigger.appendChild(valueDisplay);
+    trigger.appendChild(arrow);
+
+    // Create dropdown panel
+    const dropdown = document.createElement('div');
+    dropdown.className = 'role-switcher-panel';
+    dropdown.setAttribute('role', 'listbox');
+
+    // Add Reviewers group
+    if (reviewers.length > 0) {
+        const reviewerLabel = document.createElement('div');
+        reviewerLabel.className = 'role-switcher-group-label';
+        reviewerLabel.textContent = 'Reviewers';
+        dropdown.appendChild(reviewerLabel);
+
+        reviewers.forEach(user => {
+            const option = document.createElement('div');
+            option.className = 'role-switcher-option';
+            if (currentUser.id === user.id) {
+                option.classList.add('selected');
             }
-            // Scroll to top before navigation
-            window.scrollTo(0, 0);
-            // If on admin dashboard and switching to non-admin, redirect to home
-            if (window.location.pathname.includes('admin-dashboard.html') && selectedUser.role !== 'admin') {
-                window.location.href = 'index.html';
-            } else {
-                window.location.reload();
+            option.setAttribute('data-user-id', user.id);
+            option.textContent = user.name;
+            dropdown.appendChild(option);
+        });
+    }
+
+    // Add Submitters group
+    if (submitters.length > 0) {
+        const submitterLabel = document.createElement('div');
+        submitterLabel.className = 'role-switcher-group-label';
+        submitterLabel.textContent = 'Submitters';
+        dropdown.appendChild(submitterLabel);
+
+        submitters.forEach(user => {
+            const option = document.createElement('div');
+            option.className = 'role-switcher-option';
+            if (currentUser.id === user.id) {
+                option.classList.add('selected');
+            }
+            option.setAttribute('data-user-id', user.id);
+            option.textContent = user.name;
+            dropdown.appendChild(option);
+        });
+    }
+
+    wrapper.appendChild(trigger);
+    wrapper.appendChild(dropdown);
+
+    // Toggle dropdown
+    let isOpen = false;
+    const toggleDropdown = () => {
+        isOpen = !isOpen;
+        wrapper.classList.toggle('open', isOpen);
+        trigger.setAttribute('aria-expanded', isOpen.toString());
+    };
+
+    trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleDropdown();
+    });
+
+    // Option selection
+    dropdown.addEventListener('click', (e) => {
+        const option = e.target.closest('.role-switcher-option');
+        if (option) {
+            const userId = option.getAttribute('data-user-id');
+            const selectedUser = users.find(u => u.id === userId);
+            if (selectedUser) {
+                setCurrentUser(selectedUser);
+                // Disable browser's automatic scroll restoration
+                if ('scrollRestoration' in history) {
+                    history.scrollRestoration = 'manual';
+                }
+                // Scroll to top before navigation
+                window.scrollTo(0, 0);
+                // If on admin dashboard and switching to non-admin, redirect to home
+                if (window.location.pathname.includes('admin-dashboard.html') && selectedUser.role !== 'admin') {
+                    window.location.href = 'index.html';
+                } else {
+                    window.location.reload();
+                }
             }
         }
     });
 
-    switcherContainer.appendChild(select);
-    // Insert before the "Submit Request" button or at the beginning
-    navActions.insertBefore(switcherContainer, navActions.firstChild);
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+        if (!wrapper.contains(e.target) && isOpen) {
+            isOpen = false;
+            wrapper.classList.remove('open');
+            trigger.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    // Insert at the beginning of nav-actions
+    navActions.insertBefore(wrapper, navActions.firstChild);
 }
 
 // User dropdown functionality

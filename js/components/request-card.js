@@ -39,6 +39,16 @@ function parseRequestDetails(request) {
         
         details.helpType = data.helpType;
         
+        // Add request type if present
+        if (data.helpType) {
+            const typeLabels = {
+                'signature': 'E-Signature',
+                'contractPull': 'Contract Pull',
+                'other': 'Other'
+            };
+            details.items.push({ label: 'Request Type', value: typeLabels[data.helpType] || toTitleCase(data.helpType) });
+        }
+        
         // Add completion date if present
         if (data.completionDate) {
             const date = new Date(data.completionDate);
@@ -113,37 +123,39 @@ export function renderRequestCard(request) {
     
     return `
         <div class="request-card" role="button" tabindex="0" aria-label="View details for request ${safeTitle}" onclick="window.location.href='${detailUrl}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='${detailUrl}';}">
-            <div class="card-icon ${icon.class}">
-                ${icon.svg}
-            </div>
-            
             <div class="request-header-main">
                 <h3 class="request-title">${safeTitle}</h3>
-                <span class="status-badge ${statusClass}">${escapeHtml(request.status)}</span>
             </div>
             
 ${detailsHtml}
             
-            <div class="request-footer">
-                ${fileCount > 0 ? `
-                <div class="file-count">
-                    ${fileCount} ${fileCount === 1 ? 'file' : 'files'}
-                </div>
-                ` : ''}
-                <div class="assigned-user">
-                    ${assignedUserName ? `
+            <div class="request-footer-section">
+                ${assignedUserName ? `
+                <div class="request-assignee">
+                    <span class="assignee-label">Assigned to</span>
+                    <div class="assigned-user-pill">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                         ${escapeHtml(assignedUserName)}
-                    ` : ''}
+                    </div>
                 </div>
-                <div class="card-launch-btn">
-                    View Details
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3.33334 8H12.6667M12.6667 8L8.00001 3.33333M12.6667 8L8.00001 12.6667" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                ` : ''}
+
+                <div class="request-actions">
+                    ${fileCount > 0 ? `
+                    <div class="file-count">
+                        ${fileCount} ${fileCount === 1 ? 'file' : 'files'}
+                    </div>
+                    ` : '<span></span>'}
+                    
+                    <div class="card-launch-btn">
+                        View Details
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3.33334 8H12.6667M12.6667 8L8.00001 3.33333M12.6667 8L8.00001 12.6667" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
                 </div>
             </div>
         </div>

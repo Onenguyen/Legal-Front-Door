@@ -125,9 +125,9 @@
 }
 
 .btn-submit-request:hover {
-    background-color: var(--primary-hover);
-    color: #000000 !important;
-    transform: none;
+    background-color: var(--secondary-color);
+    color: #FFFFFF !important;
+    transform: scale(1.05);
     box-shadow: none;
 }
 

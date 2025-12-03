@@ -1994,69 +1994,149 @@ function showReviewModal() {
     const formData = collectFormData();
     let html = '';
     
-    html += `<h4>Request Type</h4>`;
-    html += `<p><strong>Type:</strong> ${toTitleCase(formData.type)}</p>`;
-    html += `<p><strong>Help Needed:</strong> ${toTitleCase(formData.helpType)}</p>`;
+    html += `<div class="review-section">`;
+    html += `<h4 class="review-section-title">Request Type</h4>`;
+    html += `<div class="review-grid">`;
+
+    html += `<div class="review-item">
+        <span class="review-label">Type</span>
+        <span class="review-value">${toTitleCase(formData.type)}</span>
+    </div>`;
+
+    html += `<div class="review-item">
+        <span class="review-label">Help Needed</span>
+        <span class="review-value">${toTitleCase(formData.helpType)}</span>
+    </div>`;
     
     if (formData.submittingForOther) {
         const person = submittingForOtherPicker?.getPerson();
-        html += `<p><strong>Submitting For Someone Else:</strong> ${person ? person.name : formData.submittingForOther}</p>`;
+        html += `<div class="review-item full-width">
+            <span class="review-label">Submitting For Someone Else</span>
+            <span class="review-value">${person ? person.name : formData.submittingForOther}</span>
+        </div>`;
     }
     
     if (formData.completionDate) {
         const date = new Date(formData.completionDate);
-        html += `<p><strong>Completion Date:</strong> ${date.toLocaleDateString()}</p>`;
+        html += `<div class="review-item">
+            <span class="review-label">Completion Date</span>
+            <span class="review-value">${date.toLocaleDateString()}</span>
+        </div>`;
     }
+
+    html += `</div></div>`; // End grid, end section
     
     if (formData.helpType === 'signature' && formData.signatureDetails) {
-        html += `<h4>Signature Details</h4>`;
-        html += `<p><strong>Signature Type:</strong> ${formData.signatureDetails.signatureType === 'wetInk' ? 'Wet Ink' : 'E-Signature'}</p>`;
-        html += `<p><strong>Files:</strong> ${formData.signatureDetails.files.length} file(s) uploaded</p>`;
+        html += `<div class="review-section">`;
+        html += `<h4 class="review-section-title">Signature Details</h4>`;
+        html += `<div class="review-grid">`;
+
+        html += `<div class="review-item">
+            <span class="review-label">Signature Type</span>
+            <span class="review-value">${formData.signatureDetails.signatureType === 'wetInk' ? 'Wet Ink' : 'E-Signature'}</span>
+        </div>`;
+
+        html += `<div class="review-item">
+            <span class="review-label">Files</span>
+            <span class="review-value">${formData.signatureDetails.files.length} file(s) uploaded</span>
+        </div>`;
         
         if (formData.signatureDetails.needsTranslation) {
-            html += `<p><strong>Needs Translation:</strong> Yes</p>`;
+            html += `<div class="review-item">
+                <span class="review-label">Needs Translation</span>
+                <span class="review-value">Yes</span>
+            </div>`;
             if (formData.signatureDetails.translationLanguage) {
-                html += `<p><strong>Translation Language:</strong> ${formData.signatureDetails.translationLanguage}</p>`;
+                html += `<div class="review-item">
+                    <span class="review-label">Translation Language</span>
+                    <span class="review-value">${formData.signatureDetails.translationLanguage}</span>
+                </div>`;
             }
         }
         
         // Show signers for E-Signature
         if (formData.signatureDetails.signatureType === 'eSignature' && formData.signatureDetails.signers && formData.signatureDetails.signers.length > 0) {
-            html += `<p><strong>Signers (in signing order):</strong></p>`;
-            html += `<ol style="margin: 0.5rem 0 1rem 1.5rem;">`;
+            html += `<div class="review-item full-width">
+                <span class="review-label">Signers (in signing order)</span>
+                <div class="review-value">
+                    <ol class="review-list">`;
             formData.signatureDetails.signers.forEach(signer => {
                 const titleText = signer.title ? ` - ${signer.title}` : '';
-                html += `<li style="margin-bottom: 0.25rem;">${signer.name}${titleText} (${signer.email})</li>`;
+                html += `<li>${signer.name}${titleText} (${signer.email})</li>`;
             });
-            html += `</ol>`;
+            html += `</ol></div></div>`;
         }
         
         if (formData.signatureDetails.signatureType === 'wetInk') {
             const wetInkOptionsFormatted = formData.signatureDetails.wetInkOptions.map(opt => toTitleCase(opt)).join(', ');
-            html += `<p><strong>Wet Ink Options:</strong> ${wetInkOptionsFormatted}</p>`;
+            html += `<div class="review-item full-width">
+                <span class="review-label">Wet Ink Options</span>
+                <span class="review-value">${wetInkOptionsFormatted}</span>
+            </div>`;
             
             // Show scanned copy preference
             if (formData.signatureDetails.scannedCopy) {
-                html += `<p><strong>Scanned Copy Needed:</strong> ${formData.signatureDetails.scannedCopy === 'yes' ? 'Yes' : 'No'}</p>`;
+                html += `<div class="review-item">
+                    <span class="review-label">Scanned Copy Needed</span>
+                    <span class="review-value">${formData.signatureDetails.scannedCopy === 'yes' ? 'Yes' : 'No'}</span>
+                </div>`;
             }
             
             // Show apostille country if apostille is required
             if (formData.signatureDetails.notarization && formData.signatureDetails.notarization.apostille === 'yes') {
-                html += `<p><strong>Apostille Required:</strong> Yes</p>`;
+                html += `<div class="review-item">
+                    <span class="review-label">Apostille Required</span>
+                    <span class="review-value">Yes</span>
+                </div>`;
                 if (formData.signatureDetails.notarization.apostilleCountry) {
-                    html += `<p><strong>Apostille Country:</strong> ${formData.signatureDetails.notarization.apostilleCountry}</p>`;
+                    html += `<div class="review-item">
+                        <span class="review-label">Apostille Country</span>
+                        <span class="review-value">${formData.signatureDetails.notarization.apostilleCountry}</span>
+                    </div>`;
                 }
             }
         }
+
+        html += `</div></div>`; // End grid, end section
+
     } else if (formData.helpType === 'contractPull' && formData.contractPullDetails) {
-        html += `<h4>Contract Pull Details</h4>`;
-        html += `<p><strong>Sales Contract:</strong> ${formData.contractPullDetails.salesContract === 'yes' ? 'Yes' : 'No'}</p>`;
-        html += `<p><strong>Entity:</strong> ${toTitleCase(formData.contractPullDetails.originatingEntity)}</p>`;
-        html += `<p><strong>Agreement Type:</strong> ${formData.contractPullDetails.agreementName}</p>`;
-        html += `<p><strong>Reason for Request:</strong> ${formData.contractPullDetails.description}</p>`;
+        html += `<div class="review-section">`;
+        html += `<h4 class="review-section-title">Contract Pull Details</h4>`;
+        html += `<div class="review-grid">`;
+
+        html += `<div class="review-item">
+            <span class="review-label">Sales Contract</span>
+            <span class="review-value">${formData.contractPullDetails.salesContract === 'yes' ? 'Yes' : 'No'}</span>
+        </div>`;
+
+        html += `<div class="review-item">
+            <span class="review-label">Entity</span>
+            <span class="review-value">${toTitleCase(formData.contractPullDetails.originatingEntity)}</span>
+        </div>`;
+
+        html += `<div class="review-item full-width">
+            <span class="review-label">Agreement Type</span>
+            <span class="review-value">${formData.contractPullDetails.agreementName}</span>
+        </div>`;
+
+        html += `<div class="review-item full-width">
+            <span class="review-label">Reason for Request</span>
+            <span class="review-value">${formData.contractPullDetails.description}</span>
+        </div>`;
+
+        html += `</div></div>`; // End grid, end section
+
     } else if (formData.helpType === 'other' && formData.otherDetails) {
-        html += `<h4>Request Details</h4>`;
-        html += `<p>${formData.otherDetails.description}</p>`;
+        html += `<div class="review-section">`;
+        html += `<h4 class="review-section-title">Request Details</h4>`;
+        html += `<div class="review-grid">`;
+
+        html += `<div class="review-item full-width">
+            <span class="review-label">Description</span>
+            <span class="review-value">${formData.otherDetails.description}</span>
+        </div>`;
+
+        html += `</div></div>`; // End grid, end section
     }
     
     reviewContent.innerHTML = html;
@@ -2075,115 +2155,80 @@ function closeReviewModal() {
 // ============================================
 
 /**
- * Generate a descriptive title for signature requests
+ * Generate a short title for signature requests
+ * Pattern: "E-Signature: <primary doc name>" or "Wet Ink: <primary doc name>"
  * @param {Object} signatureDetails - Signature form details
- * @returns {string} Descriptive title
+ * @returns {string} Short descriptive title
  */
 function generateSignatureTitle(signatureDetails) {
-    const parts = [];
-    
-    // Add file names if available
-    if (signatureDetails.files && signatureDetails.files.length > 0) {
-        const fileNames = signatureDetails.files.map(f => {
-            // Remove extension and truncate if too long
-            const nameWithoutExt = f.name.replace(/\.[^/.]+$/, '');
-            return nameWithoutExt.length > 30 ? nameWithoutExt.substring(0, 30) + '...' : nameWithoutExt;
-        });
-        if (fileNames.length === 1) {
-            parts.push(fileNames[0]);
-        } else if (fileNames.length > 1) {
-            parts.push(`${fileNames[0]} +${fileNames.length - 1} more`);
-        }
-    }
-    
-    // Add signature type
     const sigType = signatureDetails.signatureType === 'wetInk' ? 'Wet Ink' : 'E-Signature';
-    parts.push(sigType);
     
-    // Add key features
-    const features = [];
-    if (signatureDetails.needsTranslation) {
-        const lang = signatureDetails.translationLanguage || 'Translation';
-        features.push(lang);
-    }
-    // Add signers count for E-Signature
-    if (signatureDetails.signatureType === 'eSignature' && signatureDetails.signers && signatureDetails.signers.length > 0) {
-        const signerCount = signatureDetails.signers.length;
-        features.push(`${signerCount} signer${signerCount > 1 ? 's' : ''}`);
-    }
-    if (signatureDetails.wetInkOptions) {
-        if (signatureDetails.wetInkOptions.includes('notarize')) {
-            features.push('Notarization');
+    // Get primary document name
+    if (signatureDetails.files && signatureDetails.files.length > 0) {
+        const primaryFile = signatureDetails.files[0];
+        // Remove extension and truncate if too long
+        let docName = primaryFile.name.replace(/\.[^/.]+$/, '');
+        if (docName.length > 40) {
+            docName = docName.substring(0, 40) + '...';
         }
-        if (signatureDetails.wetInkOptions.includes('stampSeal')) {
-            features.push('Stamp/Seal');
-        }
-    }
-    if (features.length > 0) {
-        parts.push(`with ${features.join(', ')}`);
+        return `${sigType}: ${docName}`;
     }
     
-    // Fallback if no file names
-    if (parts.length === 1) {
-        return `Signature Request - ${parts[0]}`;
-    }
-    
-    return parts.join(' - ');
+    // Fallback if no file
+    return `${sigType} Request`;
 }
 
 /**
- * Generate a descriptive title for contract pull requests
+ * Generate a short title for contract pull requests
+ * Pattern: "Contract Pull: <agreement or company>"
  * @param {Object} contractPullDetails - Contract pull form details
- * @returns {string} Descriptive title
+ * @returns {string} Short descriptive title
  */
 function generateContractPullTitle(contractPullDetails) {
-    const parts = ['Contract Pull'];
-    
-    // Add agreement type
+    // Prefer agreement name, fall back to company names
     if (contractPullDetails.agreementName && contractPullDetails.agreementName.trim()) {
-        const agreementName = contractPullDetails.agreementName.trim();
-        // Truncate if too long
-        const displayName = agreementName.length > 40 ? agreementName.substring(0, 40) + '...' : agreementName;
-        parts.push(displayName);
+        let name = contractPullDetails.agreementName.trim();
+        if (name.length > 50) {
+            name = name.substring(0, 50) + '...';
+        }
+        return `Contract Pull: ${name}`;
     }
     
-    // Add company names if available
     if (contractPullDetails.companyNames && contractPullDetails.companyNames.trim()) {
-        const companyNames = contractPullDetails.companyNames.trim();
-        // Truncate if too long
-        const displayCompanies = companyNames.length > 30 ? companyNames.substring(0, 30) + '...' : companyNames;
-        parts.push(`(${displayCompanies})`);
+        let company = contractPullDetails.companyNames.trim();
+        if (company.length > 50) {
+            company = company.substring(0, 50) + '...';
+        }
+        return `Contract Pull: ${company}`;
     }
     
-    // Add originating entity
-    if (contractPullDetails.originatingEntity) {
-        const entity = toTitleCase(contractPullDetails.originatingEntity);
-        parts.push(`- ${entity}`);
-    }
-    
-    return parts.join(' ');
+    return 'Contract Pull Request';
 }
 
 /**
- * Generate a descriptive title for other requests
+ * Generate a short title for other requests
+ * Pattern: First short snippet of the description, truncated
  * @param {Object} otherDetails - Other request form details
- * @returns {string} Descriptive title
+ * @returns {string} Short descriptive title
  */
 function generateOtherRequestTitle(otherDetails) {
     if (otherDetails.description && otherDetails.description.trim()) {
         const description = otherDetails.description.trim();
-        // Extract first meaningful sentence or first 60 characters
-        const firstSentence = description.split(/[.!?]/)[0].trim();
-        const snippet = firstSentence.length > 0 && firstSentence.length <= 60 
-            ? firstSentence 
-            : description.substring(0, 60).trim();
+        // Take first sentence or first 50 characters, whichever is shorter
+        const firstSentence = description.split(/[.!?\n]/)[0].trim();
+        let snippet = firstSentence.length > 0 ? firstSentence : description;
         
-        // Remove trailing punctuation if it's incomplete
-        const cleanSnippet = snippet.replace(/[.,;:]+$/, '');
-        return cleanSnippet.length > 0 ? cleanSnippet : 'LOPS General Request';
+        if (snippet.length > 50) {
+            snippet = snippet.substring(0, 50).trim() + '...';
+        }
+        
+        // Clean trailing punctuation
+        snippet = snippet.replace(/[.,;:]+$/, '');
+        
+        return snippet.length > 0 ? snippet : 'General Request';
     }
     
-    return 'LOPS General Request';
+    return 'General Request';
 }
 
 /**
@@ -2265,6 +2310,7 @@ function collectSignatureData() {
     if (data.signatureType === 'eSignature') {
         data.signers = signers.map(s => ({
             name: s.name,
+            title: s.title || '',
             email: s.email,
             signingOrder: s.order
         }));
@@ -2688,4 +2734,43 @@ onReady(() => {
             autoSaveTimer = null;
         }
     });
+    
+    // ============================================
+    // Style Toggle (Neo-Brutalist / Apple-like)
+    // ============================================
+    initStyleToggle();
 });
+
+/**
+ * Initialize the form style toggle (Bold/Refined)
+ * Switches between neo-brutalist (default) and Apple-like styles
+ */
+function initStyleToggle() {
+    const formLayout = document.querySelector('.form-layout');
+    const toggleButtons = document.querySelectorAll('.form-style-toggle .style-toggle-btn');
+    
+    if (!formLayout || toggleButtons.length === 0) return;
+    
+    // Default to Refined (apple) theme on load
+    formLayout.classList.add('intake-theme-apple');
+    
+    toggleButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const style = btn.dataset.style;
+            
+            // Update button states
+            toggleButtons.forEach(b => {
+                const isActive = b === btn;
+                b.classList.toggle('active', isActive);
+                b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            });
+            
+            // Apply or remove the Apple theme class
+            if (style === 'apple') {
+                formLayout.classList.add('intake-theme-apple');
+            } else {
+                formLayout.classList.remove('intake-theme-apple');
+            }
+        });
+    });
+}

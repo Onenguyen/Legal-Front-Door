@@ -51,18 +51,18 @@
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
     
-    /* Status colors - Apple Light Mode System Colors */
-    --status-submitted: #007AFF;
-    --status-under-review: #FF9500;
-    --status-in-progress: #AF52DE;
-    --status-resolved: #34C759;
-    --status-closed: #8E8E93;
+    /* Status colors - Cohesity Brand (Green, Pink, Black) */
+    --status-submitted: #00FFA3;
+    --status-under-review: #EC407A;
+    --status-in-progress: #00E693;
+    --status-resolved: #00CC82;
+    --status-closed: #1D1D1F;
     
-    /* Priority colors - Apple Light Mode */
-    --priority-low: #007AFF;
-    --priority-medium: #FF9500;
-    --priority-high: #FF9500;
-    --priority-urgent: #FF3B30;
+    /* Priority colors - Cohesity Brand (Green, Pink, Black) */
+    --priority-low: #00CC82;
+    --priority-medium: #EC407A;
+    --priority-high: #D81B60;
+    --priority-urgent: #1D1D1F;
     
     /* Blur Effect */
     --blur: blur(20px);

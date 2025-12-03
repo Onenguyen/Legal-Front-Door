@@ -15,39 +15,39 @@
 
 .badge-submitted {
     color: #000000;
-    background-color: #FFD60A;
+    background-color: #00FFA3;
     border-color: #000000;
 }
 
 .badge-under-review {
-    color: #000000;
-    background-color: #FF9500;
+    color: #FFFFFF;
+    background-color: #EC407A;
     border-color: #000000;
 }
 
 .badge-in-progress {
-    color: #FFFFFF;
-    background-color: var(--secondary-color);
+    color: #000000;
+    background-color: #00E693;
     border-color: #000000;
 }
 
 .badge-resolved {
     color: #000000;
-    background-color: #34C759;
+    background-color: #00CC82;
     border-color: #000000;
 }
 
 .badge-closed {
     color: #FFFFFF;
-    background-color: #636366;
+    background-color: #1D1D1F;
     border-color: #000000;
 }
 
-/* Status Badge Variants */
+/* Status Badge Variants - Cohesity Brand (Green, Pink, Black) */
 .status-pending,
 .status-submitted {
     color: #000000;
-    background-color: #FFD60A;
+    background-color: #00FFA3;
     border-color: #000000;
 }
 
@@ -55,7 +55,7 @@
 .status-in-review,
 .status-under-review {
     color: #FFFFFF;
-    background-color: var(--secondary-color);
+    background-color: #EC407A;
     border-color: #000000;
 }
 
@@ -63,7 +63,7 @@
 .status-approved,
 .status-resolved {
     color: #000000;
-    background-color: #34C759;
+    background-color: #00CC82;
     border-color: #000000;
 }
 
@@ -71,7 +71,7 @@
 .status-cancelled,
 .status-closed {
     color: #FFFFFF;
-    background-color: #636366;
+    background-color: #1D1D1F;
     border-color: #000000;
 }
 

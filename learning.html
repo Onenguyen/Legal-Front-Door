@@ -13,6 +13,20 @@
 <body class="learning-page">
     <div id="navbar"></div>
 
+    <!-- Slide Navigation Dots -->
+    <nav class="slide-dots" aria-label="Slide navigation">
+        <button class="dot active" data-slide="1" aria-label="Go to slide 1" aria-current="true"></button>
+        <button class="dot" data-slide="2" aria-label="Go to slide 2"></button>
+        <button class="dot" data-slide="3" aria-label="Go to slide 3"></button>
+        <button class="dot" data-slide="4" aria-label="Go to slide 4"></button>
+        <button class="dot" data-slide="5" aria-label="Go to slide 5"></button>
+        <button class="dot" data-slide="6" aria-label="Go to slide 6"></button>
+        <button class="dot" data-slide="7" aria-label="Go to slide 7"></button>
+        <button class="dot" data-slide="8" aria-label="Go to slide 8"></button>
+        <button class="dot" data-slide="9" aria-label="Go to slide 9"></button>
+        <button class="dot" data-slide="10" aria-label="Go to slide 10"></button>
+    </nav>
+
     <main class="tour-container">
         <!-- Slide 1: Cover - Neo Brutalist -->
         <section class="tour-slide" id="slide-1">
@@ -40,14 +54,14 @@
                         <div class="mock-label">How can we help?</div>
                         <div class="mock-options">
                             <div class="mock-pill active">SIGNATURE</div>
-                            <div class="mock-pill">CONTRACT</div>
+                            <div class="mock-pill">CONTRACT PULL</div>
                             <div class="mock-pill">OTHER</div>
                         </div>
                     </div>
                 </div>
                 <div class="card-content">
                     <h2 class="anim-el delay-2">Start with the Basics</h2>
-                    <p class="anim-el delay-3">Select your request type: Signature, Contract, or Other. The form adapts to your choice.</p>
+                    <p class="anim-el delay-3">Select your request type: Signature, Contract Pull, or Other. The form adapts to your choice.</p>
                 </div>
             </div>
         </section>
@@ -82,7 +96,7 @@
                     </div>
                 </div>
                 <div class="card-content">
-                    <h2 class="anim-stamp delay-2">Flexible Signatures</h2>
+                    <h2>Flexible Signatures</h2>
                     <p class="anim-el delay-3">Choose E-Signature for fast digital signing via DocuSign, or Wet Ink when you need notarization, apostilles, stamps, or physical originals.</p>
                 </div>
             </div>
@@ -95,14 +109,14 @@
                 <div class="card-visual anim-el delay-1">
                     <div class="mock-contract-form">
                         <div class="mock-agreement-list">
-                            <div class="mock-agreement-item highlight-pink">NDA</div>
-                            <div class="mock-agreement-item">AMENDMENT</div>
-                            <div class="mock-agreement-item">MASTER AGREEMENT (MA)</div>
+                            <div class="mock-agreement-item highlight-pink anim-stagger" style="--stagger-index: 0">NDA</div>
+                            <div class="mock-agreement-item anim-stagger" style="--stagger-index: 1">AMENDMENT</div>
+                            <div class="mock-agreement-item anim-stagger" style="--stagger-index: 2">MASTER AGREEMENT (MA)</div>
                         </div>
                     </div>
                 </div>
                 <div class="card-content">
-                    <h2 class="anim-el delay-2">Contract Pull</h2>
+                    <h2>Contract Pull</h2>
                     <p class="anim-el delay-3">Need a copy of an existing agreement? Tell us the counterparty and agreement type, and we'll locate and pull it for you.</p>
                 </div>
             </div>
@@ -124,17 +138,205 @@
                     </div>
                 </div>
                 <div class="card-content">
-                    <h2 class="anim-slide-reveal delay-2">Transparent Status</h2>
+                    <h2>Transparent Status</h2>
                     <p class="anim-el delay-3">Watch your request move from 'Submitted' to 'Processing' to 'Complete' in real-time.</p>
                 </div>
             </div>
         </section>
 
-        <!-- Slide 6: CTA -->
+        <!-- Slide 6: AgilePoint Customization -->
         <section class="tour-slide" id="slide-6">
             <div class="tour-card">
+                <div class="slide-number">05</div>
+                <div class="card-visual anim-el delay-1">
+                    <div class="mock-ui-stack">
+                        <div class="mock-feature-list">
+                            <div class="mock-feature-item anim-typography">
+                                <span class="feature-icon">Aa</span>
+                                <span class="feature-text">Typography</span>
+                            </div>
+                            <div class="mock-feature-item anim-styling">
+                                <span class="feature-icon">◐</span>
+                                <span class="feature-text">Styling</span>
+                            </div>
+                            <div class="mock-feature-item anim-animations">
+                                <span class="feature-icon">✦</span>
+                                <span class="feature-text">Animations</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h2>AgilePoint Ready</h2>
+                    <p class="anim-el delay-3">Everything you see works in AgilePoint. Typography, styling, and animations are fully customizable.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Hybrid DevOps -->
+        <section class="tour-slide" id="slide-7">
+            <div class="tour-card">
+                <div class="slide-number">06</div>
+                <div class="card-visual anim-el delay-1">
+                    <div class="mock-ui-stack">
+                        <div class="mock-devops-flow">
+                            <div class="devops-stage anim-stagger" style="--stagger-index: 0">
+                                <span class="stage-icon">[U]</span>
+                                <span class="stage-label">User</span>
+                                <span class="stage-detail">Submits Request</span>
+                            </div>
+                            <div class="devops-arrow anim-stagger" style="--stagger-index: 1">→</div>
+                            <div class="devops-stage highlight-green anim-stagger" style="--stagger-index: 2">
+                                <span class="stage-icon">{&nbsp;}</span>
+                                <span class="stage-label">HTML/JS</span>
+                                <span class="stage-detail">Forms & Validation</span>
+                            </div>
+                            <div class="devops-arrow anim-stagger" style="--stagger-index: 3">→</div>
+                            <div class="devops-stage highlight-pink anim-stagger" style="--stagger-index: 4">
+                                <span class="stage-icon">[A]</span>
+                                <span class="stage-label">AgilePoint</span>
+                                <span class="stage-detail">Workflow & Routing</span>
+                            </div>
+                        </div>
+                        <div class="mock-feature-list" style="margin-top: 20px;">
+                            <div class="mock-feature-item anim-stagger" style="--stagger-index: 5">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Git + CI/CD for UI</span>
+                            </div>
+                            <div class="mock-feature-item anim-stagger" style="--stagger-index: 6">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Reusable Templates & Validations</span>
+                            </div>
+                            <div class="mock-feature-item anim-stagger" style="--stagger-index: 7">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Low-Code Workflows</span>
+                            </div>
+                            <div class="mock-feature-item anim-stagger" style="--stagger-index: 8">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Independent Releases</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h2>Hybrid DevOps</h2>
+                    <p class="anim-el delay-3">Instead of using AgilePoint's limited form builder, we build and manage our own forms—giving us full control over design, validations, and reusable templates. AgilePoint handles the data and workflow routing.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: Form Anatomy -->
+        <section class="tour-slide" id="slide-8">
+            <div class="tour-card">
+                <div class="slide-number">07</div>
+                <div class="card-visual anim-el delay-1">
+                    <div class="mock-ui-stack">
+                        <div class="mock-form-anatomy">
+                            <div class="form-layer collapsed anim-stagger" style="--stagger-index: 0">
+                                <span class="layer-icon">[H]</span>
+                                <span class="layer-label">Hidden Fields Panel</span>
+                                <span class="layer-detail">Data entity fields</span>
+                            </div>
+                            <div class="form-layer expanded highlight-green anim-stagger" style="--stagger-index: 1">
+                                <span class="layer-icon">{&nbsp;}</span>
+                                <span class="layer-label">Raw HTML Widget</span>
+                                <span class="layer-detail">#lops-form-container</span>
+                            </div>
+                            <div class="form-layer anim-stagger" style="--stagger-index: 2">
+                                <span class="layer-icon">[+]</span>
+                                <span class="layer-label">Attachment Control</span>
+                                <span class="layer-detail">Process attachments</span>
+                            </div>
+                            <div class="form-layer anim-stagger" style="--stagger-index: 3">
+                                <span class="layer-icon">[S]</span>
+                                <span class="layer-label">Subform: LOPS_Signer</span>
+                                <span class="layer-detail">Signer metadata</span>
+                            </div>
+                        </div>
+                        <div class="mock-feature-list" style="margin-top: 20px;">
+                            <div class="mock-feature-item anim-stagger" style="--stagger-index: 4">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Full UX control in HTML/JS</span>
+                            </div>
+                            <div class="mock-feature-item anim-stagger" style="--stagger-index: 5">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">AgilePoint stores all data</span>
+                            </div>
+                            <div class="mock-feature-item anim-stagger" style="--stagger-index: 6">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Version-controlled in Git</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h2>Form Anatomy</h2>
+                    <p class="anim-el delay-3">Our custom HTML/JS lives inside AgilePoint's Raw HTML widget. Hidden fields and subforms hold the data model—AgilePoint never sees our UI, just the values we sync.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: AI-Assisted Form Scaffolding -->
+        <section class="tour-slide" id="slide-9">
+            <div class="tour-card">
+                <div class="slide-number">08</div>
+                <div class="card-visual anim-el delay-1">
+                    <div class="mock-ai-prompt">
+                        <div class="ai-columns">
+                            <div class="ai-column ai-prompt-col anim-stagger" style="--stagger-index: 0">
+                                <div class="ai-label">PROMPT</div>
+                                <div class="ai-snippet">
+                                    <span class="snippet-line">"Use the LOPS intake stylesheet</span>
+                                    <span class="snippet-line">and these requirements…</span>
+                                    <span class="snippet-line highlight">Map fields into:</span>
+                                    <span class="snippet-line indent">[H] Hidden Fields Panel</span>
+                                    <span class="snippet-line indent">{ } Raw HTML Widget</span>
+                                    <span class="snippet-line indent">[+] Attachment Control</span>
+                                    <span class="snippet-line indent">[S] Subform: LOPS_Signer</span>
+                                    <span class="snippet-line">✓ Full UX control in HTML/JS"</span>
+                                </div>
+                            </div>
+                            <div class="ai-arrow anim-stagger" style="--stagger-index: 1">→</div>
+                            <div class="ai-column ai-result-col anim-stagger" style="--stagger-index: 2">
+                                <div class="ai-label">RESULT</div>
+                                <div class="ai-snippet">
+                                    <span class="snippet-line code">&lt;div id="lops-form-container"&gt;</span>
+                                    <span class="snippet-line code indent">&lt;section class="form-step"&gt;</span>
+                                    <span class="snippet-line code indent2">…fields & validation…</span>
+                                    <span class="snippet-line code indent">&lt;/section&gt;</span>
+                                    <span class="snippet-line code">&lt;/div&gt;</span>
+                                    <span class="snippet-line code comment">// syncs to AgilePoint</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mock-feature-list" style="margin-top: 20px;">
+                            <div class="mock-feature-item anim-stagger" style="--stagger-index: 3">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">AI generates form scaffold from requirements</span>
+                            </div>
+                            <div class="mock-feature-item anim-stagger" style="--stagger-index: 4">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Refactor for AgilePoint data model</span>
+                            </div>
+                            <div class="mock-feature-item anim-stagger" style="--stagger-index: 5">
+                                <span class="feature-icon">✓</span>
+                                <span class="feature-text">Refine & check into Git</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <h2>Prompt-to-Form</h2>
+                    <p class="anim-el delay-3">We feed AI our style guide, requirements, and AgilePoint mappings to generate consistent, production-ready forms—fast and repeatable across projects.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10: CTA -->
+        <section class="tour-slide" id="slide-10">
+            <div class="tour-card">
                 <div class="card-content centered">
-                    <h2 class="anim-el delay-1">That's It!</h2>
+                    <h2 class="anim-celebrate delay-1">That's It!</h2>
                     <div class="cta-summary anim-el delay-2">
                         <div class="summary-item">✓ Signatures & Wet Ink</div>
                         <div class="summary-item">✓ Contract Pulls</div>

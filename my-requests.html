@@ -8,45 +8,170 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/pages/my-requests.css">
+    <style>
+        /* Extra styles for native selects in filter bar */
+        .filter-select {
+            appearance: none;
+            background: transparent;
+            border: none;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            padding: 0.5rem 1.5rem 0.5rem 0.5rem;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M1 1L5 5L9 1'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.25rem center;
+            background-size: 0.65rem;
+            border-radius: 4px;
+        }
+        .filter-select:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+        .filter-select:focus {
+            outline: none;
+            background-color: rgba(0,0,0,0.05);
+        }
+    </style>
 </head>
 <body>
     <div id="navbar"></div>
 
     <div class="container">
         <div class="filters-section">
-            <div class="search-box">
-                <input type="text" id="searchInput" class="form-control" placeholder="Search by title, ID, or description...">
-            </div>
-            <div class="filter-controls">
-                <select id="statusFilter" class="form-control" multiple>
-                    <option value="">All Statuses</option>
-                    <option value="Submitted">Submitted</option>
-                    <option value="Under Review">Under Review</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Resolved">Resolved</option>
-                    <option value="Closed">Closed</option>
-                </select>
-                <select id="typeFilter" class="form-control" multiple>
-                    <option value="">All Types</option>
-                    <option value="Contract Review">Contract Review</option>
-                    <option value="Legal Advice">Legal Advice</option>
-                    <option value="Compliance">Compliance</option>
-                    <option value="IP/Patent">IP/Patent</option>
-                    <option value="Employment">Employment</option>
-                    <option value="Other">Other</option>
-                </select>
-                <select id="priorityFilter" class="form-control" multiple>
-                    <option value="">All Priorities</option>
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                    <option value="Urgent">Urgent</option>
-                </select>
+            <div class="filters-group" style="width: 100%; justify-content: space-between;">
+                <div class="admin-search-box">
+                    <span class="admin-search-icon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
+                    <input type="text" id="searchInput" placeholder="Search requests...">
+                </div>
+                
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div class="filter-dropdown">
+                        <select id="statusFilter" class="filter-select">
+                            <option value="">All Statuses</option>
+                            <option value="Submitted">Submitted</option>
+                            <option value="Under Review">Under Review</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-dropdown">
+                        <select id="typeFilter" class="filter-select">
+                            <option value="">All Types</option>
+                            <option value="Contract Review">Contract Review</option>
+                            <option value="Legal Advice">Legal Advice</option>
+                            <option value="Compliance">Compliance</option>
+                            <option value="IP/Patent">IP/Patent</option>
+                            <option value="Employment">Employment</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-dropdown">
+                        <select id="priorityFilter" class="filter-select">
+                            <option value="">All Priorities</option>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
+                    
+                    <div class="view-toggle-divider"></div>
+                    
+                    <div class="view-toggle" id="viewToggle">
+                        <button type="button" class="view-toggle-btn active" data-view="kanban" title="Kanban View">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="5" height="18" rx="1"></rect>
+                                <rect x="10" y="3" width="5" height="12" rx="1"></rect>
+                                <rect x="17" y="3" width="5" height="15" rx="1"></rect>
+                            </svg>
+                        </button>
+                        <button type="button" class="view-toggle-btn" data-view="table" title="Table View">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                                <line x1="3" y1="18" x2="21" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="requestsContainer" class="requests-grid">
-            <!-- Requests will be populated here -->
+        <div id="kanbanBoard" class="kanban-board">
+            <div class="kanban-column">
+                <div class="kanban-header">
+                    <span class="status-dot status-submitted"></span>
+                    <h3>Submitted</h3>
+                    <span class="count" id="count-submitted">0</span>
+                </div>
+                <div id="col-submitted" class="kanban-column-content">
+                    <!-- Submitted requests -->
+                </div>
+            </div>
+
+            <div class="kanban-column">
+                <div class="kanban-header">
+                    <span class="status-dot status-review"></span>
+                    <h3>Under Review</h3>
+                    <span class="count" id="count-review">0</span>
+                </div>
+                <div id="col-review" class="kanban-column-content">
+                    <!-- Under Review requests -->
+                </div>
+            </div>
+
+            <div class="kanban-column">
+                <div class="kanban-header">
+                    <span class="status-dot status-progress"></span>
+                    <h3>In Progress</h3>
+                    <span class="count" id="count-progress">0</span>
+                </div>
+                <div id="col-progress" class="kanban-column-content">
+                    <!-- In Progress requests -->
+                </div>
+            </div>
+
+            <div class="kanban-column">
+                <div class="kanban-header">
+                    <span class="status-dot status-done"></span>
+                    <h3>Done</h3>
+                    <span class="count" id="count-done">0</span>
+                </div>
+                <div id="col-done" class="kanban-column-content">
+                    <!-- Resolved/Closed requests -->
+                </div>
+            </div>
+        </div>
+
+        <div id="tableView" class="table-container" style="display: none;">
+            <div class="table-scroll-wrapper">
+                <table class="requests-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Submitted By</th>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Assigned To</th>
+                            <th>Need By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestsTableBody">
+                        <!-- Requests will be populated here -->
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div id="noRequests" class="no-data" style="display: none;">

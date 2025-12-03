@@ -8,81 +8,106 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/pages/admin-dashboard.css">
+    <style>
+        /* Extra styles for native selects in filter bar */
+        .filter-select {
+            appearance: none;
+            background: transparent;
+            border: none;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            padding: 0.5rem 1.5rem 0.5rem 0.5rem;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M1 1L5 5L9 1'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.25rem center;
+            background-size: 0.65rem;
+            border-radius: 4px;
+        }
+        .filter-select:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+        .filter-select:focus {
+            outline: none;
+            background-color: rgba(0,0,0,0.05);
+        }
+    </style>
 </head>
 <body>
     <div id="navbar"></div>
 
     <div class="container">
-        <div class="stats-container">
-            <div class="stat-card" id="totalRequestsCard" data-filter-type="all">
-                <div class="stat-value" id="totalRequests">0</div>
-                <div class="stat-label">Total Requests</div>
-            </div>
-            <div class="stat-card" id="pendingRequestsCard" data-filter-type="pending">
-                <div class="stat-value" id="pendingRequests">0</div>
-                <div class="stat-label">Pending Review</div>
-            </div>
-            <div class="stat-card" id="inProgressRequestsCard" data-filter-type="in-progress">
-                <div class="stat-value" id="inProgressRequests">0</div>
-                <div class="stat-label">In Progress</div>
-            </div>
-            <div class="stat-card" id="completedRequestsCard" data-filter-type="completed">
-                <div class="stat-value" id="completedRequests">0</div>
-                <div class="stat-label">Completed</div>
-            </div>
-        </div>
+        <!-- New Admin Header: Filters only -->
+        <div class="admin-header">
+            <div class="filters-group" style="width: 100%; justify-content: space-between;">
+                <div class="admin-search-box">
+                    <span class="admin-search-icon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
+                    <input type="text" id="searchInput" placeholder="Search requests...">
+                </div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <div class="filter-dropdown">
+                        <select id="statusFilter" class="filter-select">
+                            <option value="">All Statuses</option>
+                            <option value="Submitted">Submitted</option>
+                            <option value="Under Review">Under Review</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-dropdown">
+                        <select id="typeFilter" class="filter-select">
+                            <option value="">All Types</option>
+                            <option value="Contract Review">Contract Review</option>
+                            <option value="Legal Advice">Legal Advice</option>
+                            <option value="Compliance">Compliance</option>
+                            <option value="IP/Patent">IP/Patent</option>
+                            <option value="Employment">Employment</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
 
-        <div class="filters-section">
-            <div class="search-box">
-                <input type="text" id="searchInput" class="form-control" placeholder="Search by title, ID, description, or submitter...">
-            </div>
-            <div class="filter-controls">
-                <select id="statusFilter" class="form-control" multiple>
-                    <option value="">All Statuses</option>
-                    <option value="Submitted">Submitted</option>
-                    <option value="Under Review">Under Review</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Resolved">Resolved</option>
-                    <option value="Closed">Closed</option>
-                </select>
-                <select id="typeFilter" class="form-control" multiple>
-                    <option value="">All Types</option>
-                    <option value="Contract Review">Contract Review</option>
-                    <option value="Legal Advice">Legal Advice</option>
-                    <option value="Compliance">Compliance</option>
-                    <option value="IP/Patent">IP/Patent</option>
-                    <option value="Employment">Employment</option>
-                    <option value="Other">Other</option>
-                </select>
-                <select id="priorityFilter" class="form-control" multiple>
-                    <option value="">All Priorities</option>
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                    <option value="Urgent">Urgent</option>
-                </select>
+                    <div class="filter-dropdown">
+                        <select id="priorityFilter" class="filter-select">
+                            <option value="">All Priorities</option>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="table-container">
-            <table class="requests-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Title</th>
-                        <th>Type</th>
-                        <th>Priority</th>
-                        <th>Status</th>
-                        <th>Submitted By</th>
-                        <th>Assigned To</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="requestsTableBody">
-                    <!-- Requests will be populated here -->
-                </tbody>
-            </table>
+            <div class="table-scroll-wrapper">
+                <table class="requests-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Submitted By</th>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Assigned To</th>
+                            <th>Need By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestsTableBody">
+                        <!-- Requests will be populated here -->
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div id="noRequests" class="no-data" style="display: none;">
@@ -90,28 +115,30 @@
         </div>
     </div>
 
-    <div id="assignModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Assign Request</h2>
-                <span id="assignModalClose" class="modal-close">&times;</span>
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="confirmation-modal">
+        <div class="confirmation-modal-content">
+            <div class="confirmation-modal-header">
+                <h3 id="confirmationTitle">Confirm Change</h3>
+                <button type="button" class="confirmation-modal-close" id="confirmationClose">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label for="assignUserSelect">Assign To</label>
-                    <select id="assignUserSelect" class="form-control">
-                        <option value="">Unassigned</option>
-                    </select>
+            <div class="confirmation-modal-body">
+                <p id="confirmationMessage">Are you sure you want to make this change?</p>
+                <div class="confirmation-change-preview" id="changePreview">
+                    <!-- Change details will be inserted here -->
                 </div>
-                <div class="assign-modal-actions">
-                    <button id="cancelAssignBtn" class="btn btn-secondary btn-small">Cancel</button>
-                    <button id="confirmAssignBtn" class="btn btn-primary btn-small">Assign</button>
+                <div class="confirmation-error" id="confirmationError" style="display: none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <span id="confirmationErrorText"></span>
                 </div>
+            </div>
+            <div class="confirmation-modal-footer">
+                <button type="button" class="btn btn-secondary" id="confirmationCancel">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmationConfirm">Confirm</button>
             </div>
         </div>
     </div>
-
-    <!-- M1, M2, M7 FIX: Cleaned up script loading - removed deprecated files, unified module approach -->
+    
     <script src="js/mock-data.js"></script>
     <script src="js/app.js"></script>
     <script type="module" src="js/multi-select.js"></script>
@@ -120,13 +147,5 @@
         autoInitNavbar();
     </script>
     <script type="module" src="js/pages/admin-dashboard.js"></script>
-    <!-- 
-        C2 FIX: Removed inline admin check script.
-        Admin access check is now handled exclusively in js/pages/admin-dashboard.js 
-        via checkAdminAccess() which runs after modules are properly loaded.
-        This prevents the race condition where getCurrentUser() might be called
-        before the state module is initialized.
-    -->
 </body>
 </html>
-
